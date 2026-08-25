@@ -1,0 +1,30 @@
+#first time writing docker so documenting everything so that later I can refer this
+services: #announces list of container we wish to create
+  postgres: # naming our first service as postgres
+    image: postgres:16-alpine #Docker downloads version 16 of postgres from internet
+    container_name: postgres_container
+    restart: unless-stopped
+    ports: 
+      -"5432-5432" #format:host_port-> container port basically Map port 5432 on my computer → port 5432 inside the Docker container.
+    environment:
+      POSTGRES_USER: rushly
+      POSTGRES_PASSWORD: rushly_dev_pw
+      POSTGRES_DB: rushly
+    #Containers wipe clean when they restart. 
+    #A "volume" saves your database tables safely on your hard drive 
+    #so you don't lose your data when you shut down Docker.
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    #Mapping: in volumes left side postgres-data(name of storage space created on hard drive)
+    #Right side->internal Linux file path inside container
+  redis:
+    image: redis:7-alpine
+    container_name: redis_container
+    restart: unless-stopped
+    ports: "6379-6379"
+    volumes:
+      -redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+volumes:
+  postgres-data:
+  redis-data:
