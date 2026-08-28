@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import { z } from 'zod';
-
+// Zod basically checks if all environment variables are configured or not and a good schema is followed or not
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(4000),
-  MONGO_URI: z.string().url(),
+  DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
