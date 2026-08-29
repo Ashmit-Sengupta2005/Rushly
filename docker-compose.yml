@@ -5,7 +5,7 @@ services: #announces list of container we wish to create
     container_name: postgres_container
     restart: unless-stopped
     ports: 
-      -"5432-5432" #format:host_port-> container port basically Map port 5432 on my computer → port 5432 inside the Docker container.
+      - "5432:5432" #format:host_port-> container port basically Map port 5432 on my computer → port 5432 inside the Docker container.
     environment:
       POSTGRES_USER: rushly
       POSTGRES_PASSWORD: rushly_dev_pw
@@ -21,9 +21,10 @@ services: #announces list of container we wish to create
     image: redis:7-alpine
     container_name: redis_container
     restart: unless-stopped
-    ports: "6379-6379"
+    ports: 
+      - "6379:6379"
     volumes:
-      -redis-data:/data
+      - redis-data:/data
     command: ["redis-server", "--appendonly", "yes"]
 volumes:
   postgres-data:

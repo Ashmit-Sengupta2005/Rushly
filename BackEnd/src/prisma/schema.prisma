@@ -6,9 +6,129 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+// ENUM
+
+enum OrderStatus {
+  PENDING // created, before reservation confirmed
+  RESERVED // stock held, awaiting payment
+  PAID // payment succeeded via webhook
+  FULFILLED // shipped / delivered
+  CANCELLED // cancelled before payment
+  REFUNDED // fully refunded post-payment
+}
+
+enum ReservationStatus {
+  PENDING // active hold, waiting for payment
+  PAID // converted into an order
+  EXPIRED // TTL hit, Redis holds released
+  CANCELLED // user cancelled explicitly
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum SaleStatus {
+  SCHEDULED // future, waiting-room accepting entries
+  ACTIVE // currently running, admissions happening
+  ENDED // over — successful or sold out
+  CANCELLED
+}
+
+// ============================================================
+// AUTH & USER
+// ============================================================
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id                  String        @id @default(cuid())
+  email               String        @unique
+  passwordHash        String
+  name                String
+  role                Role          @default(CUSTOMER)
+  refreshTokenVersion Int           @default(0)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  addresses           Address[]
+  cart                Cart?
+  reservations        Reservation[]
+  orders              Order[]
+
+  @@index([email])
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  line1      String
+  line2      String
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("India")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ============================================================
+// CATALOG
+// ============================================================
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  name             String
+  description      String
+  price            Decimal           @db.Decimal(10, 2)
+  categoryId       String?
+  category         Category?         @relation(fields: [categoryId], references: [id])
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  images           ProductImage[]
+  inventory        Inventory?
+  cartItems        CartItem[]
+  reservationItems ReservationItem[]
+  orderItems       OrderItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int     @default(0) // for ordering images in a gallery
+
+  @@index([productId, position])
 }
