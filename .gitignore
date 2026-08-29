@@ -2,3 +2,4 @@
 /FrontEnd/node_modules/
 *.log
 /.env
+./agents
