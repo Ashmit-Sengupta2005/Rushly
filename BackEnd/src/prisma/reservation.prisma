@@ -56,7 +56,7 @@ model ReservationItem {
      * So what we do is we keep a isActive attribute in product which basically does the work if admin deletes the product
      */
     quantity      Int
-    priceSnapshot Decimal     @db.Decimal(10, 2)
+    priceSnapshot Int
     /**
      * Basically suppose sale started with each laptop at Rs 500 and
      * after that admin changed it to Rs 1000 meanwhile user A saw 500 and added to cart

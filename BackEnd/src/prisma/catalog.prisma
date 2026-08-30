@@ -16,7 +16,7 @@ model Product {
     slug        String    @unique
     name        String
     description String
-    price       Decimal   @db.Decimal(10, 2)
+    price       Int
     categoryId  String?
     category    Category? @relation(fields: [categoryId], references: [id])
     isActive    Boolean   @default(true)

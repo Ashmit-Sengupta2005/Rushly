@@ -18,7 +18,7 @@ model Refund {
     orderId        String
     order          Order        @relation(fields: [orderId], references: [id])
     stripeRefundId String       @unique
-    amount         Decimal      @db.Decimal(10, 2)
+    amount         Int
     reason         String?
     status         RefundStatus @default(PENDING)
     createdAt      DateTime     @default(now())
