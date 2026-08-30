@@ -1,0 +1,20 @@
+// ============================================================
+// OUTBOX — reliable side-effect dispatch (emails, notifications)
+// ============================================================
+
+// Written in the SAME transaction as the Order. A background worker
+// polls status='PENDING' and dispatches. If the DB transaction rolls
+// back, the outbox row is gone too — no phantom emails.
+
+model OutboxEvent {
+    id          String       @id @default(cuid())
+    type        String // "order_confirmation" | "refund_notification" | ...
+    payload     Json
+    status      OutboxStatus @default(PENDING)
+    attempts    Int          @default(0)
+    lastError   String?
+    createdAt   DateTime     @default(now())
+    processedAt DateTime?
+
+    @@index([status, createdAt]) // worker's query: WHERE status='PENDING' ORDER BY createdAt
+}

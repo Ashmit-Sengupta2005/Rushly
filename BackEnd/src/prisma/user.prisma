@@ -1,0 +1,36 @@
+// ============================================================
+// AUTH & USER
+// ============================================================
+// cuid-> collision resistant unique identifier
+model User {
+    id                  String        @id @default(cuid())
+    email               String        @unique
+    passwordHash        String
+    name                String
+    role                Role          @default(CUSTOMER)
+    refreshTokenVersion Int           @default(0)
+    createdAt           DateTime      @default(now())
+    updatedAt           DateTime      @updatedAt
+    addresses           Address[]
+    cart                Cart?
+    reservations        Reservation[]
+    orders              Order[]
+
+    @@index([email])
+}
+
+model Address {
+    id         String   @id @default(cuid())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    line1      String
+    line2      String
+    city       String
+    state      String
+    postalCode String
+    country    String   @default("India")
+    isDefault  Boolean  @default(false)
+    createdAt  DateTime @default(now())
+
+    @@index([userId])
+}

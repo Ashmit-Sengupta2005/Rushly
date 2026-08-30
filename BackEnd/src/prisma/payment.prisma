@@ -1,0 +1,28 @@
+// ============================================================
+// PAYMENTS — webhook idempotency & refunds
+// ============================================================
+// PK = Stripe's event.id. Insert-first pattern gives us dedup on duplicate webhook delivery.
+model ProcessedWebhookEvent {
+    stripeEventId String   @id
+    type          String
+    status        String   @default("processing") // "processing" | "done" | "failed"
+    processedAt   DateTime @default(now())
+    errorMessage  String?
+
+    @@index([type])
+    @@index([processedAt])
+}
+
+model Refund {
+    id             String       @id @default(cuid())
+    orderId        String
+    order          Order        @relation(fields: [orderId], references: [id])
+    stripeRefundId String       @unique
+    amount         Decimal      @db.Decimal(10, 2)
+    reason         String?
+    status         RefundStatus @default(PENDING)
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+
+    @@index([orderId])
+}

@@ -1,0 +1,29 @@
+/**
+ * ! FEW SYSTEM DESIGN CONCEPTS USED HERE
+ * ? 1. Why product and inventory are different tables?
+ * Products and inventory are different tables because
+ * product details rarely change like description,category,images etc
+ * and hence product details are cached in redis so that a expensive API call to postgres isn't made
+ * But since this is a flash sale website inventory changes frequently and postgres needs to updated
+ * And hence we spend our major time on inventory via postgres
+ * ? 2. Use of version in inventory table(benifit + drawback)
+ * Ok so the thing is even if 50 items are left in the stock
+ * and two users A,B come to buy ..so A and B both get ticket 1
+ * Now A completes payment first and sends system his ticket no which matches
+ * and overall transaction is successful (stock drops to 49..ticket updates to 2)
+ * While B completes his payment a bit later and sends ticket 1 to system which
+ * dose not match with ticket 2 and payment fails even though stock is available.
+ */
+
+model Inventory {
+    id             String   @id @default(cuid())
+    productId      String   @unique
+    product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    totalStock     Int
+    availableStock Int
+    // check difference between totalStock vs availableStock from rushly-database word doc
+    version        Int      @default(0)
+    updatedAt      DateTime @updatedAt
+
+    @@index([productId])
+}

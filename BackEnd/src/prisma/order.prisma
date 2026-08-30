@@ -1,0 +1,60 @@
+// ============================================================
+// ORDER (post-payment, source of truth for what happened)
+// ============================================================
+
+model Order {
+    id                    String       @id @default(cuid())
+    userId                String
+    user                  User         @relation(fields: [userId], references: [id])
+    reservationId         String?      @unique
+    reservation           Reservation? @relation(fields: [reservationId], references: [id])
+    status                OrderStatus  @default(PENDING)
+    totalAmount           Decimal      @db.Decimal(10, 2)
+    currency              String       @default("INR")
+    stripePaymentIntentId String?      @unique
+    shippingAddress       Json? // snapshot of address at purchase time
+    /**
+     * If I use address type here then the problem would be all orders which were done
+     * on old address would be updated to the current address hence losing all the information
+     */
+    createdAt             DateTime     @default(now())
+    updatedAt             DateTime     @updatedAt
+
+    items         OrderItem[]
+    statusHistory OrderStatusHistory[]
+    refunds       Refund[]
+
+    @@index([userId])
+    @@index([status])
+    @@index([createdAt])
+    @@index([stripePaymentIntentId])
+}
+
+model OrderItem {
+    id                   String  @id @default(cuid())
+    orderId              String
+    order                Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    productId            String
+    product              Product @relation(fields: [productId], references: [id])
+    quantity             Int
+    priceSnapshot        Decimal @db.Decimal(10, 2) // price actually paid
+    productNameSnapshot  String // name at purchase — historical accuracy
+    productImageSnapshot String? // primary image at purchase
+
+    @@index([orderId])
+    @@index([productId])
+}
+
+model OrderStatusHistory {
+    id         String       @id @default(cuid())
+    orderId    String
+    order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    fromStatus OrderStatus?
+    toStatus   OrderStatus
+    reason     String?
+    changedBy  String? // userId of admin, or "system" for webhook-driven changes
+    changedAt  DateTime     @default(now())
+
+    @@index([orderId])
+    @@index([changedAt])
+}

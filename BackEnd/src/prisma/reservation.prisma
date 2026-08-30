@@ -1,0 +1,76 @@
+// ============================================================
+// RESERVATION (holds during checkout — 10 min TTL)
+// ============================================================
+model Reservation {
+    id        String            @id @default(cuid())
+    userId    String
+    user      User              @relation(fields: [userId], references: [id])
+    /**
+     * Why isn't on delete cascade true here?
+     * Reasoning
+     * Ok so basically you say that suppose user A buys 10 phones...
+     * so 10 phones are already there in his cart total stock remains x
+     * but available stock becomes x-10 suppose he tries to delete his account
+     * and dosen't actually purchase then the problem is that the 10 min reservation timer dosent work
+     * and those 10 items are permanently lost and total stock becomes x-10 whereas this is not the actual case
+     * totalStock=availableStock =x
+     * So a cart active user can never delete his account as per system rules
+     */
+    status    ReservationStatus @default(PENDING)
+    expiresAt DateTime // TTL — sweep worker releases if not paid by then
+    /**
+     * expiresAt= booked time +10 mins
+     * Sweep worker is a background script which runs continuously and scans database looking for rows where
+     * expiresAt is reached and hence inorder to process millions of orders with ease we index at expiresAt
+     */
+    items     ReservationItem[]
+    order     Order? // populated after successful payment
+    /**
+     * Ok so basically after payment is confirmed and
+     * webhook returns payment successful more than once then
+     * when the first time it is received We check the reservations
+     * that were related to this payment and create the order attribute
+     * in the reservation table as well as create a new row in Order
+     * referencing this reservation and then when duplicate webhooks fire
+     * we see that if the order is added as row or not in the table
+     * if yes next requests are skipped
+     */
+    createdAt DateTime          @default(now())
+    updatedAt DateTime          @updatedAt
+
+    @@index([userId])
+    @@index([expiresAt]) // sweep worker scans this
+    @@index([status])
+}
+
+model ReservationItem {
+    id            String      @id @default(cuid())
+    reservationId String
+    reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+    // if reservation is deleted reservation items are deleted as well
+    productId     String
+    product       Product     @relation(fields: [productId], references: [id])
+    /**
+     * On cascade isn't true here because if a product is deleted then all old and new reservations
+     * are deleted even if a user purchased that product 2 years ago and hence we lose information
+     * So what we do is we keep a isActive attribute in product which basically does the work if admin deletes the product
+     */
+    quantity      Int
+    priceSnapshot Decimal     @db.Decimal(10, 2)
+    /**
+     * Basically suppose sale started with each laptop at Rs 500 and
+     * after that admin changed it to Rs 1000 meanwhile user A saw 500 and added to cart
+     * So he has to pay as per price at the time he reserved which is Rs 500 not Rs 1000
+     */
+    holdId        String      @unique // matches the Redis hold key: hold:{holdId}
+
+    /**
+     * Without hold id every second for every customer postgreSQL is queried in order to
+     * check if time has expired or not ...so basically for a single expiry time multiple
+     * API calls are wasted
+     * Hence we use redis which uses the holdId and stores the timer every second the query is sent to redis
+     * whether timer as expired or not and the final timer expired query is sent by redis to postgres(only one for a timer)
+     * which reduces cost by a lot
+     */
+    @@index([reservationId])
+}

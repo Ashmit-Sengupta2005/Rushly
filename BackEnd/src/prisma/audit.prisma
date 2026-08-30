@@ -1,0 +1,18 @@
+// ============================================================
+// AUDIT (admin actions — nice for the dashboard, defensive for later)
+// ============================================================
+model AuditLog {
+    id         String   @id @default(cuid())
+    actorId    String // admin user id
+    action     String // "product.create" | "order.refund" | "inventory.adjust" | ...
+    entityType String
+    entityId   String
+    //entity basically represents name of table in String format instead of manually writing tablename?
+    // check word doc for more info
+    metadata   Json?
+    createdAt  DateTime @default(now())
+
+    @@index([actorId])
+    @@index([entityType, entityId])
+    @@index([createdAt])
+}
