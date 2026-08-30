@@ -1,12 +1,13 @@
-import { createPrismaClient } from "../prisma/prisma.config.js";
-import { logger } from "../utils/logger.js";
-export const prisma = createPrismaClient();
-export const connectDB=async()=>{
-    try{
-        await prisma.$connect();
-        logger.info('✅ PostgreSQL connected via Prisma');
-    }
-    catch(error){
-        logger.error({ err: error }, '❌ PostgreSQL connection failed');
-        process.exit(1);}
-    }
+import { prisma } from './prisma.js';
+import { logger } from '../utils/logger.js';
+
+export async function connectDb() {
+  // Prisma connects lazily on first query, but we ping here to fail fast
+  // at boot rather than at first request if the DB is unreachable.
+  await prisma.$queryRaw`SELECT 1`;
+  logger.info('✅ PostgreSQL connected');
+}
+
+export async function disconnectDb() {
+  await prisma.$disconnect();
+}
