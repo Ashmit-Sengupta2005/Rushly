@@ -52,7 +52,7 @@ enum SaleStatus {
 // ============================================================
 // AUTH & USER
 // ============================================================
-
+// cuid-> collision resistant unique identifier
 model User {
   id                  String        @id @default(cuid())
   email               String        @unique
@@ -100,17 +100,17 @@ model Category {
 }
 
 model Product {
-  id               String            @id @default(cuid())
-  slug             String            @unique
-  name             String
-  description      String
-  price            Decimal           @db.Decimal(10, 2)
-  categoryId       String?
-  category         Category?         @relation(fields: [categoryId], references: [id])
-  isActive         Boolean           @default(true)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String
+  price       Decimal   @db.Decimal(10, 2)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
   images           ProductImage[]
   inventory        Inventory?
   cartItems        CartItem[]
@@ -131,4 +131,268 @@ model ProductImage {
   position  Int     @default(0) // for ordering images in a gallery
 
   @@index([productId, position])
+}
+
+/**
+ * ! FEW SYSTEM DESIGN CONCEPTS USED HERE
+ * ? 1. Why product and inventory are different tables?
+ * Products and inventory are different tables because
+ * product details rarely change like description,category,images etc
+ * and hence product details are cached in redis so that a expensive API call to postgres isn't made
+ * But since this is a flash sale website inventory changes frequently and postgres needs to updated
+ * And hence we spend our major time on inventory via postgres
+ * ? 2. Use of version in inventory table(benifit + drawback)
+ * Ok so the thing is even if 50 items are left in the stock
+ * and two users A,B come to buy ..so A and B both get ticket 1
+ * Now A completes payment first and sends system his ticket no which matches
+ * and overall transaction is successful (stock drops to 49..ticket updates to 2)
+ * While B completes his payment a bit later and sends ticket 1 to system which
+ * dose not match with ticket 2 and payment fails even though stock is available.
+ */
+
+model Inventory {
+  id             String   @id @default(cuid())
+  productId      String   @unique
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  totalStock     Int
+  availableStock Int
+  // check difference between totalStock vs availableStock from rushly-database word doc
+  version        Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  @@index([productId])
+}
+
+// ============================================================
+// CART (session-persistent, one per user)
+// ============================================================
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now())
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  cartId        String
+  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int
+  priceSnapshot Decimal  @db.Decimal(10, 2) // price at add-to-cart — detect changes at checkout
+  addedAt       DateTime @default(now())
+
+  @@unique([cartId, productId]) // one row per (cart, product)
+  @@index([cartId])
+}
+
+// ============================================================
+// RESERVATION (holds during checkout — 10 min TTL)
+// ============================================================
+model Reservation {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  /**
+   * Why isn't on delete cascade true here?
+   * Reasoning
+   * Ok so basically you say that suppose user A buys 10 phones...
+   * so 10 phones are already there in his cart total stock remains x
+   * but available stock becomes x-10 suppose he tries to delete his account
+   * and dosen't actually purchase then the problem is that the 10 min reservation timer dosent work
+   * and those 10 items are permanently lost and total stock becomes x-10 whereas this is not the actual case
+   * totalStock=availableStock =x
+   * So a cart active user can never delete his account as per system rules
+   */
+  status    ReservationStatus @default(PENDING)
+  expiresAt DateTime // TTL — sweep worker releases if not paid by then
+  /**
+   * expiresAt= booked time +10 mins
+   * Sweep worker is a background script which runs continuously and scans database looking for rows where
+   * expiresAt is reached and hence inorder to process millions of orders with ease we index at expiresAt
+   */
+  items     ReservationItem[]
+  order     Order? // populated after successful payment
+  /**
+   * Ok so basically after payment is confirmed and
+   * webhook returns payment successful more than once then
+   * when the first time it is received We check the reservations
+   * that were related to this payment and create the order attribute
+   * in the reservation table as well as create a new row in Order
+   * referencing this reservation and then when duplicate webhooks fire
+   * we see that if the order is added as row or not in the table
+   * if yes next requests are skipped
+   */
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt]) // sweep worker scans this
+  @@index([status])
+}
+
+model ReservationItem {
+  id            String      @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  // if reservation is deleted reservation items are deleted as well
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  /**
+   * On cascade isn't true here because if a product is deleted then all old and new reservations
+   * are deleted even if a user purchased that product 2 years ago and hence we lose information
+   * So what we do is we keep a isActive attribute in product which basically does the work if admin deletes the product
+   */
+  quantity      Int
+  priceSnapshot Decimal     @db.Decimal(10, 2)
+  /**
+   * Basically suppose sale started with each laptop at Rs 500 and
+   * after that admin changed it to Rs 1000 meanwhile user A saw 500 and added to cart
+   * So he has to pay as per price at the time he reserved which is Rs 500 not Rs 1000
+   */
+  holdId        String      @unique // matches the Redis hold key: hold:{holdId}
+
+  /**
+   * Without hold id every second for every customer postgreSQL is queried in order to
+   * check if time has expired or not ...so basically for a single expiry time multiple
+   * API calls are wasted
+   * Hence we use redis which uses the holdId and stores the timer every second the query is sent to redis
+   * whether timer as expired or not and the final timer expired query is sent by redis to postgres(only one for a timer)
+   * which reduces cost by a lot
+   */
+  @@index([reservationId])
+}
+
+// ============================================================
+// ORDER (post-payment, source of truth for what happened)
+// ============================================================
+
+model Order {
+  id                    String       @id @default(cuid())
+  userId                String
+  user                  User         @relation(fields: [userId], references: [id])
+  reservationId         String?      @unique
+  reservation           Reservation? @relation(fields: [reservationId], references: [id])
+  status                OrderStatus  @default(PENDING)
+  totalAmount           Decimal      @db.Decimal(10, 2)
+  currency              String       @default("INR")
+  stripePaymentIntentId String?      @unique
+  shippingAddress       Json? // snapshot of address at purchase time
+  /**
+   * If I use address type here then the problem would be all orders which were done
+   * on old address would be updated to the current address hence losing all the information
+   */
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+  refunds       Refund[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([stripePaymentIntentId])
+}
+
+model OrderItem {
+  id                   String  @id @default(cuid())
+  orderId              String
+  order                Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId            String
+  product              Product @relation(fields: [productId], references: [id])
+  quantity             Int
+  priceSnapshot        Decimal @db.Decimal(10, 2) // price actually paid
+  productNameSnapshot  String // name at purchase — historical accuracy
+  productImageSnapshot String? // primary image at purchase
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id         String       @id @default(cuid())
+  orderId    String
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  reason     String?
+  changedBy  String? // userId of admin, or "system" for webhook-driven changes
+  changedAt  DateTime     @default(now())
+
+  @@index([orderId])
+  @@index([changedAt])
+}
+
+// ============================================================
+// PAYMENTS — webhook idempotency & refunds
+// ============================================================
+// PK = Stripe's event.id. Insert-first pattern gives us dedup on duplicate webhook delivery.
+model ProcessedWebhookEvent {
+  stripeEventId String   @id
+  type          String
+  status        String   @default("processing") // "processing" | "done" | "failed"
+  processedAt   DateTime @default(now())
+  errorMessage  String?
+
+  @@index([type])
+  @@index([processedAt])
+}
+
+model Refund {
+  id             String       @id @default(cuid())
+  orderId        String
+  order          Order        @relation(fields: [orderId], references: [id])
+  stripeRefundId String       @unique
+  amount         Decimal      @db.Decimal(10, 2)
+  reason         String?
+  status         RefundStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([orderId])
+}
+
+// ============================================================
+// OUTBOX — reliable side-effect dispatch (emails, notifications)
+// ============================================================
+
+// Written in the SAME transaction as the Order. A background worker
+// polls status='PENDING' and dispatches. If the DB transaction rolls
+// back, the outbox row is gone too — no phantom emails.
+
+model OutboxEvent {
+  id          String       @id @default(cuid())
+  type        String // "order_confirmation" | "refund_notification" | ...
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0)
+  lastError   String?
+  createdAt   DateTime     @default(now())
+  processedAt DateTime?
+
+  @@index([status, createdAt]) // worker's query: WHERE status='PENDING' ORDER BY createdAt
+}
+
+// ============================================================
+// AUDIT (admin actions — nice for the dashboard, defensive for later)
+// ============================================================
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String // admin user id
+  action     String // "product.create" | "order.refund" | "inventory.adjust" | ...
+  entityType String
+  entityId   String
+  //entity basically represents name of table in String format instead of manually writing tablename?
+  // check word doc for more info
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
 }
