@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "../prisma/prisma.config.js";
 import { env } from "./.env.js";
 //? Trivial development phase optimization
 /* Singleton pattern: in dev, nodemon restarts create a new module scope
@@ -7,11 +8,7 @@ import { env } from "./.env.js";
    Hanging the client off globalThis dedups across restarts.*/
 const globalForPrisma=globalThis as unknown as {prisma?:PrismaClient};
 export const prisma= globalForPrisma.prisma??
-                     new PrismaClient({
-                        log:
-                        env.NODE_ENV==='development'?
-                        ['query','error','warn'] :['error']
-                     });
+                     createPrismaClient();
 if(env.NODE_ENV!=='production'){
     globalForPrisma.prisma=prisma;
 }

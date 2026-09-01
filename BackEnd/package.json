@@ -50,6 +50,7 @@
     "typescript": "^6.0.3"
   },
   "prisma": {
-    "schema": "./src/prisma"
+    "schema": "./src/prisma",
+    "seed": "tsx prisma/seed.ts"
   }
 }
