@@ -15,7 +15,7 @@ import { errors } from './Errors.js';
 export const validate={
     body:
       <T>(schema:ZodType<T>)=>{
-        (req:Request,res:Response,next:NextFunction)=>{
+        return (req:Request,res:Response,next:NextFunction)=>{
             const result=schema.safeParse(req.body);
             if(!result.success){
                 return next(errors.badRequest(
@@ -27,7 +27,7 @@ export const validate={
       },
     query:
     <T>(schema:ZodType<T>)=>{
-        (req:Request,res:Response,next:NextFunction)=>{
+        return (req:Request,res:Response,next:NextFunction)=>{
             const result=schema.safeParse(req.query);
             if(!result.success){
                 return next(errors.badRequest(
@@ -39,7 +39,7 @@ export const validate={
       },
     params:
     <T>(schema:ZodType<T>)=>{
-        (req:Request,res:Response,next:NextFunction)=>{
+        return (req:Request,res:Response,next:NextFunction)=>{
             const result=schema.safeParse(req.params);
             if(!result.success){
                 return next(errors.badRequest(

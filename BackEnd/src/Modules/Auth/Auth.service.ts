@@ -60,8 +60,7 @@ export const authService={
             if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
         throw errors.conflict('EMAIL_TAKEN', 'An account with this email already exists');
       }
-      throw err;
-        }
+      throw err;}
     const tokens = this.issueTokens(user);
     return { user: toPublicUser(user), tokens };
     },
