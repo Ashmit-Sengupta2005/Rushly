@@ -10,14 +10,17 @@ import { authRouter } from "./Modules/Auth/Auth.routes.js"
 import { catalogRouter,catalogAdminRouter } from "./Modules/Catalog/Catalog.routes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js"
 
-export function createApp(){
     const app=express();
     app.use(helmet()); // security and utility middleware
     app.use(cors({origin:env.CORS_ORIGIN,credentials:true}));
     app.use(express.json({limit:'1mb'}));
     app.use(cookieParser());// populates req.cookies from the Cookie header
     app.use(pinoHttp({ logger }));
+
     app.use('/api',systemRouter);
     app.use('/api/auth',authRouter);
+    app.use('/api/products', catalogRouter);
+    app.use('/api/admin/products', catalogAdminRouter);
+
     app.use(errorHandler);
-    return  app;}
+    export default app;

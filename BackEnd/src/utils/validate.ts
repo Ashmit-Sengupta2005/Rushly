@@ -2,6 +2,19 @@ import type { Request, Response, NextFunction } from 'express';
 import type { ZodType } from 'zod';
 import { z } from 'zod';
 import { errors } from './Errors.js';
+
+// Express 5 makes req.query a getter with no setter, so it can no longer be
+// reassigned (unlike req.body/req.params, which stay plain writable objects).
+// The validated/coerced query is stashed here instead and read back via
+// req.validatedQuery in the controller.
+declare global {
+  namespace Express {
+    interface Request {
+      validatedQuery?: unknown;
+    }
+  }
+}
+
 /* This is a middleware factory which produces middlewares
     which inturn validates HTTP requests*/
 
@@ -34,7 +47,7 @@ export const validate={
                     'Validation_Error','Query Params Failed Verification',
                     z.flattenError(result.error).fieldErrors
                 ));}
-            req.query=result.data as Request['query'];
+            req.validatedQuery=result.data;
             next();}
       },
     params:

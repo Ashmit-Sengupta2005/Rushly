@@ -1,10 +1,11 @@
 import type { Request,Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { catalogService } from "./Catalog.service.js";
+import type { ListProductsQuery } from "./Catalog.schemas.js";
 
 export const catalogController = {
   list: asyncHandler(async (req: Request, res: Response) => {
-    const result = await catalogService.listProducts(req.query as any);
+    const result = await catalogService.listProducts(req.validatedQuery as ListProductsQuery);
     res.json(result);
   }),
    getBySlug: asyncHandler(async (req: Request, res: Response) => {
