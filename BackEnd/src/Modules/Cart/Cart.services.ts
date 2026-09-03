@@ -121,7 +121,19 @@ export const cartService={
                 currentLineTotal:item.product.price * item.quantity,
                 priceChanged,
                 outOfStock,
-            };
+            };     
         });
-    }
+        const subtotal = items.reduce((sum, i) => sum + i.lineTotal, 0);
+        const currentSubtotal = items.reduce((sum, i) => sum + i.currentLineTotal, 0);
+        const hasPriceChanges = items.some((i) => i.priceChanged);
+        const hasOutOfStock = items.some((i) => i.outOfStock);
+
+        return {
+        id: cart.id,
+          items,
+          subtotal,
+          currentSubtotal,
+          hasPriceChanges,
+          hasOutOfStock,
+          updatedAt: cart.updatedAt,};}
 }
