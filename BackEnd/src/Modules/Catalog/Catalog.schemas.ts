@@ -50,5 +50,5 @@ export const adjustInventorySchema = z.object({
 export type AdjustInventoryInput = z.infer<typeof adjustInventorySchema>;
 
 export const productIdParamsSchema = z.object({
-  id: z.string().cuid(),
+  id: z.cuid2(),
 });
