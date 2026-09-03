@@ -23,10 +23,10 @@ export const errors = {
     new AppError(401, code, message),
   forbidden: (code = 'FORBIDDEN', message = 'Insufficient permissions') =>
     new AppError(403, code, message),
-  notFound: (code: string, message: string) =>
-    new AppError(404, code, message),
-  conflict: (code: string, message: string, details?: unknown) =>
-    new AppError(409, code, message, details),
+  notFound: (code: string, message?: string) =>
+    new AppError(404, code, message?message:""),
+  conflict: (code: string, message?: string, details?: unknown) =>
+    new AppError(409, code, message?message:"", details),
   tooMany: (code = 'RATE_LIMITED', message = 'Too many requests') =>
     new AppError(429, code, message),
   internal: (code = 'INTERNAL_ERROR', message = 'Internal server error') =>
