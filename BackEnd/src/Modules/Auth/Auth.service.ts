@@ -5,6 +5,7 @@ import {prisma} from "../../config/prisma.js"
 import { errors } from '../../utils/Errors.js';
 import { signAccessToken,signRefreshToken,verifyRefreshToken } from './Auth.tokens.js';
 import type { RegisterInput, LoginInput } from './Auth.schemas.js';
+import { logger } from '../../utils/logger.js';
 const argonOptions: HashOptions = {
   type: argon2.argon2id,
   memoryCost: 19456,  // 19 MiB
@@ -77,6 +78,7 @@ export const authService={
       throw errors.unauthorized('INVALID_CREDENTIALS', 'Invalid email or password');
     }
     const tokens = this.issueTokens(user);
+    logger.info(tokens.refreshToken);
     return { user: toPublicUser(user), tokens };      
     },
     async refresh(refreshToken:string):Promise<{ tokens: TokenBundle; user: PublicUser }>{

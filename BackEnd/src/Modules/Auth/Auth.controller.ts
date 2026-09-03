@@ -28,7 +28,7 @@ export const authController={
         res.status(201).json({user,tokens: tokens.accessToken});}),
     
     login:asyncHandler(async(req:Request,res:Response)=>{
-        const {user,tokens}=await authService.register(req.body);
+        const {user,tokens}=await authService.login(req.body);
         setRefreshCookie(res,tokens.refreshToken);
         // User gets the access token and cookie gets set
         res.status(200).json({user,tokens: tokens.accessToken});}),
