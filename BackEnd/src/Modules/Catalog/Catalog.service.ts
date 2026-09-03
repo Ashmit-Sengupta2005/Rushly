@@ -3,6 +3,8 @@ import { prisma } from "../../config/prisma.js";
 import { errors } from '../../utils/Errors.js';
 import type { ListProductsQuery,CreateProductInput,UpdateProductInput,AdjustInventoryInput } from './Catalog.schemas.js';
 
+// include is used for strictly reading results on the basis of joins 
+
 export const catalogService={
     async listProducts(query:ListProductsQuery){
         // Cursor pagination pattern: fetch limit+1, use the extra to detect
@@ -103,9 +105,60 @@ export const catalogService={
 
     },
     async deleteProduct(id:string){
-
+        // Soft-delete: mark inactive rather than DELETE. Historical orders
+        // reference product; hard-delete would orphan them.
+    try {
+      await prisma.product.update({
+        where: { id },
+        data: { isActive: false },
+      });
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError && err.code === 'P2025') {
+        throw errors.notFound('PRODUCT_NOT_FOUND', 'Product does not exist');
+      }
+      throw err;
+    }
     },
     async adjustInventory(productId:string,input:AdjustInventoryInput,adminId:string){
+        // Atomic increment via Prisma's { increment } — compiles to a single
+        // UPDATE ... SET x = x + $delta. No read-modify-write, no race.
+        // The DB CHECK constraint (available_stock >= 0) rejects negatives.
+        try{
+            const updated = await prisma.$transaction(async (tx) => {
+        const inventory = await tx.inventory.update({
+          where: { productId },
+          data: {
+            availableStock: { increment: input.delta },
+            totalStock: { increment: input.delta },
+            version: { increment: 1 },
+          },
+        });
 
-    },
-};
+        await tx.auditLog.create({
+          data: {
+            actorId: adminId,
+            action: 'inventory.adjust',
+            entityType: 'Inventory',
+            entityId: inventory.id,
+            metadata: { delta: input.delta, reason: input.reason },
+          },
+        });
+
+        return inventory;
+      });
+      return updated;
+        }
+        catch(err){
+            if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === 'P2025') {
+          throw errors.notFound('INVENTORY_NOT_FOUND', 'Product inventory does not exist');
+        }
+        // CHECK constraint fires when delta would make stock negative
+        if (err.message.includes('inventory_stock_nonneg')) {
+          throw errors.badRequest(
+            'INSUFFICIENT_STOCK',
+            'Cannot reduce stock below zero',
+          );
+        }
+      }
+      throw err;}},};
