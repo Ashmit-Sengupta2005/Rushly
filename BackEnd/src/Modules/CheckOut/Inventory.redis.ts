@@ -11,7 +11,7 @@ import { pipe } from "zod";
  * KEYS[2] = hold:{holdId}          — the hold key we'll create if successful
  * ARGV[1] = qty (integer)          — how many units to reserve
  * ARGV[2] = ttlSeconds             — how long the hold lives before auto-releasing
- *
+ *Redis must pass KEYS and ARGV to Lua in string format
  * Returns:
  *   1  = success (stock decremented, hold key created with TTL)
  *   0  = insufficient stock (nothing changed)
