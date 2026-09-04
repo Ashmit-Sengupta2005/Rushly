@@ -11,6 +11,7 @@ const schema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('7d'),
   CORS_ORIGIN: z.string().url(),
+  RESERVATION_TTL_SEC: z.coerce.number().default(600),
 });
 
 const parsed = schema.safeParse(process.env);
