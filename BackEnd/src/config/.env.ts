@@ -12,6 +12,7 @@ const schema = z.object({
   JWT_REFRESH_TTL: z.string().default('7d'),
   CORS_ORIGIN: z.string().url(),
   RESERVATION_TTL_SEC: z.coerce.number().default(600),
+  BULLMQ_QUEUE_PREFIX: z.string().default('rushly'),
 });
 
 const parsed = schema.safeParse(process.env);
