@@ -9,6 +9,7 @@ import { systemRouter } from "./Modules/System/System.route.js"
 import { authRouter } from "./Modules/Auth/Auth.routes.js"
 import { catalogRouter,catalogAdminRouter } from "./Modules/Catalog/Catalog.routes.js";
 import { cartRouter } from "./Modules/Cart/Cart.routes.js";
+import { checkoutRouter } from "./Modules/CheckOut/Checkout.routes.js";
 import { errorHandler } from "./Middlewares/errorHandler.js"
 
     const app=express();
@@ -23,6 +24,7 @@ import { errorHandler } from "./Middlewares/errorHandler.js"
     app.use('/api/products', catalogRouter);
     app.use('/api/admin/products', catalogAdminRouter);
     app.use('/api/cart', cartRouter);
-    
+    app.use('/api/checkout',checkoutRouter);
+
     app.use(errorHandler);
     export default app;

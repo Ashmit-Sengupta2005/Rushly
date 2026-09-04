@@ -9,11 +9,15 @@ export const queueConnection = {
     // BullMQ accepts a connection URL directly since v5
     url: env.REDIS_URL,
   },
+  // Namespaces this queue's Redis keys, e.g. `{rushly}:reservation-expiry:...`.
+  // Queue *names* can't contain ':' (BullMQ uses it as its own key delimiter) —
+  // that's what this option is for.
+  prefix: env.BULLMQ_QUEUE_PREFIX,
 } as const;
 
 // One queue for reservation expiries. Each job carries a reservationId
 // and fires at the reservation's expiresAt timestamp.
-export const RESERVATION_EXPIRY_QUEUE = `${env.BULLMQ_QUEUE_PREFIX}:reservation-expiry`;
+export const RESERVATION_EXPIRY_QUEUE = 'reservation-expiry';
 
 export const reservationExpiryQueue = new Queue(RESERVATION_EXPIRY_QUEUE, queueConnection);
 
