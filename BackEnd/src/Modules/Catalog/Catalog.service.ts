@@ -1,6 +1,8 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from "../../config/prisma.js";
+import { syncProductStock } from '../CheckOut/Inventory.redis.js';
 import { errors } from '../../utils/Errors.js';
+import { logger } from '../../utils/logger.js';
 import type { ListProductsQuery,CreateProductInput,UpdateProductInput,AdjustInventoryInput } from './Catalog.schemas.js';
 
 // include is used for strictly reading results on the basis of joins 
@@ -146,6 +148,14 @@ export const catalogService={
 
         return inventory;
       });
+
+      // Sync Redis AFTER the Postgres commit. If sync fails, the boot-time
+      // reseed will fix it on next restart; log for observability.
+      try {
+        await syncProductStock(productId);
+      } catch (err) {
+        logger.error({ err, productId }, 'Redis sync failed after inventory adjust');
+      }
       return updated;
         }
         catch(err){
