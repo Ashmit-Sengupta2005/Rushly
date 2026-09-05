@@ -53,14 +53,14 @@ async function processExpiryJob(job:Job<ExpiryJobData>){
         'Release failed during expiry',
       );
     }
-    // Mark reservation EXPIRED in Postgres.
-    await prisma.reservation.update({
+  }
+  // Mark reservation EXPIRED in Postgres — once per reservation, not per item.
+  await prisma.reservation.update({
     where: { id: reservationId },
     data: { status: 'EXPIRED' },
   });
 
   logger.info({ reservationId }, 'Reservation expired and released');
-  }
 }
 
 export async function startReservationExpiryWorker(){
