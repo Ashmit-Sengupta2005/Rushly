@@ -86,7 +86,6 @@ return redis.call('DEL', holdKey)
 // The BullMQ expiry job's delay uses RESERVATION_TTL_SEC exactly, so without
 // this buffer the two timers race and Redis's own TTL can auto-delete the
 // hold key before the job runs — skipping the INCRBY and leaking stock.
-const REDIS_TTL_GRACE_SEC = 30;
 
 // Cached SHA1s of each script — populated by initRedisInventory() at boot.
 let reserveSha: string;
@@ -154,7 +153,7 @@ export async function reserveStock(params:
     stockKey(params.productId),           // KEYS[1]
     holdKey(params.holdId),               // KEYS[2]
     params.qty.toString(),                // ARGV[1]
-    (env.RESERVATION_TTL_SEC + REDIS_TTL_GRACE_SEC).toString(), // ARGV[2]
+    (env.RESERVATION_TTL_SEC).toString(), // ARGV[2]
   )) as number;
     if (result === 1) return { ok: true };
     if (result === 0) return { ok: false, reason: 'INSUFFICIENT_STOCK' };

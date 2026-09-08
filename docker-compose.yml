@@ -4,8 +4,8 @@ services: #announces list of container we wish to create
     image: postgres:16-alpine #Docker downloads version 16 of postgres from internet
     container_name: postgres_container
     restart: unless-stopped
-    ports: 
-      - "5432:5432" #format:host_port-> container port basically Map port 5432 on my computer → port 5432 inside the Docker container.
+    ports:
+      - "5433:5432" #format:host_port-> container port. Using 5433 on host since a native postgres.exe service already owns 5432.
     environment:
       POSTGRES_USER: rushly
       POSTGRES_PASSWORD: rushly_dev_pw
