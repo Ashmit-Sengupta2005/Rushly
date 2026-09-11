@@ -13,6 +13,9 @@ const schema = z.object({
   CORS_ORIGIN: z.string().url(),
   RESERVATION_TTL_SEC: z.coerce.number().default(600),
   BULLMQ_QUEUE_PREFIX: z.string().default('rushly'),
+  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
+  STRIPE_API_VERSION: z.string().default('2026-08-26.dahlia'),
 });
 
 const parsed = schema.safeParse(process.env);
