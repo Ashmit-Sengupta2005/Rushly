@@ -75,5 +75,51 @@ export const stripeWebhookController={
     // ========================================================
     // Wrap in try/catch so a handler crash doesn't leave the ProcessedWebhookEvent
     // in 'processing' state forever. On error, mark as 'failed' with the error.
-  }
-}
+    try{
+        switch(event.type){
+            case 'payment_intent.succeeded':
+                await stripeWebhookService.handlePaymentSucceeded(
+                event.data.object as Stripe.PaymentIntent,);
+                break;
+            case 'payment_intent.payment_failed':
+                await stripeWebhookService.handlePaymentFailed(
+                event.data.object as Stripe.PaymentIntent,);
+                break;
+            case 'charge.refunded':
+                await stripeWebhookService.handleChargeRefunded(
+                event.data.object as Stripe.Charge,);
+                break;
+            default:
+          // Unhandled event type — log and continue. Stripe sends many event
+          // types we don't care about (customer.created, price.updated, etc.).
+          logger.debug({ type: event.type }, 'Unhandled webhook event type');
+        }
+        // Success — mark as done
+        await prisma.processedWebhookEvent.update({
+        where: { stripeEventId: event.id },
+        data: { status: 'done' },
+      });
+
+      return res.status(200).send('OK');
+    }
+    catch(err){
+        logger.error({ err, eventId: event.id, type: event.type }, 'Webhook handler failed');
+      // Mark as failed but keep the row — this prevents an infinite retry loop
+      // from Stripe. If we returned 500, Stripe would retry, and if the handler
+      // crashes deterministically, we'd get stuck. Marking as failed and
+      // returning 200 acknowledges "we saw it, but we couldn't process it."
+      //
+      // In production you'd have alerting on failed webhook events and manual
+      // reprocessing tools. For Rushly, this is enough.
+        await prisma.processedWebhookEvent.update({
+        where: { stripeEventId: event.id },
+        data: {
+          status: 'failed',
+          errorMessage: (err as Error).message,
+        },
+      });
+      // Return 200 — we've acknowledged and recorded the failure
+      return res.status(200).send('Handler failed but recorded');
+    }
+  },
+};

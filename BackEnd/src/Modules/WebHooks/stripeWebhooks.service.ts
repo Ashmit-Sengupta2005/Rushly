@@ -149,7 +149,7 @@ export const stripeWebhookService={
    * If they never retry, the BullMQ expiry worker will release the holds at
    * expiresAt. This is the correct behavior.
    */
-   handllePaymentFailed(intent:Stripe.PaymentIntent){
+   handlePaymentFailed(intent:Stripe.PaymentIntent){
     const reservationId=intent.metadata.reservationId;
     if(!reservationId) return;
     logger.warn(
@@ -161,5 +161,8 @@ export const stripeWebhookService={
       'Payment failed — reservation stays PENDING for retry',);
     // Optional: increment a "failed_attempts" counter, notify user via email, etc.
     // Deferred for now.
+  },
+  handleChargeRefunded(charge:Stripe.Charge){
+
   }
 };
