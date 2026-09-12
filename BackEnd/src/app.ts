@@ -5,16 +5,31 @@ import cookieParser from 'cookie-parser';
 import {pinoHttp} from 'pino-http';
 import { env } from "./config/.env.js";
 import { logger } from './utils/logger.js'
+import { errorHandler } from "./Middlewares/errorHandler.js"
 import { systemRouter } from "./Modules/System/System.route.js"
 import { authRouter } from "./Modules/Auth/Auth.routes.js"
 import { catalogRouter,catalogAdminRouter } from "./Modules/Catalog/Catalog.routes.js";
 import { cartRouter } from "./Modules/Cart/Cart.routes.js";
 import { checkoutRouter } from "./Modules/CheckOut/Checkout.routes.js";
-import { errorHandler } from "./Middlewares/errorHandler.js"
+import { stripeWebhookRouter } from "./Modules/WebHooks/stripeWebhooks.routes.js";
 
     const app=express();
     app.use(helmet()); // security and utility middleware
     app.use(cors({origin:env.CORS_ORIGIN,credentials:true}));
+    // ========================================================
+  // CRITICAL: raw body for Stripe webhook ONLY.
+  // This MUST come BEFORE express.json(). If express.json() runs first,
+  // the body becomes a parsed object and signature verification fails.
+  //
+  // We scope it to just this one route by mounting it at the exact path.
+  // ========================================================
+  app.use(
+    '/api/webhooks/stripe',
+    express.raw({ type: 'application/json' }),
+    stripeWebhookRouter,
+  );
+
+  // JSON parsing for everything else
     app.use(express.json({limit:'1mb'}));
     app.use(cookieParser());// populates req.cookies from the Cookie header
     app.use(pinoHttp({ logger }));
