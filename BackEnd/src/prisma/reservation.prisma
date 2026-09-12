@@ -2,9 +2,9 @@
 // RESERVATION (holds during checkout — 10 min TTL)
 // ============================================================
 model Reservation {
-    id        String            @id @default(cuid())
-    userId    String
-    user      User              @relation(fields: [userId], references: [id])
+    id                    String            @id @default(cuid())
+    userId                String
+    user                  User              @relation(fields: [userId], references: [id])
     /**
      * Why isn't on delete cascade true here?
      * Reasoning
@@ -16,15 +16,15 @@ model Reservation {
      * totalStock=availableStock =x
      * So a cart active user can never delete his account as per system rules
      */
-    status    ReservationStatus @default(PENDING)
-    expiresAt DateTime // TTL — sweep worker releases if not paid by then
+    status                ReservationStatus @default(PENDING)
+    expiresAt             DateTime // TTL — sweep worker releases if not paid by then
     /**
      * expiresAt= booked time +10 mins
      * Sweep worker is a background script which runs continuously and scans database looking for rows where
      * expiresAt is reached and hence inorder to process millions of orders with ease we index at expiresAt
      */
-    items     ReservationItem[]
-    order     Order? // populated after successful payment
+    items                 ReservationItem[]
+    order                 Order? // populated after successful payment
     /**
      * Ok so basically after payment is confirmed and
      * webhook returns payment successful more than once then
@@ -35,8 +35,9 @@ model Reservation {
      * we see that if the order is added as row or not in the table
      * if yes next requests are skipped
      */
-    createdAt DateTime          @default(now())
-    updatedAt DateTime          @updatedAt
+    stripePaymentIntentId String?           @unique // populated when payment intent is created
+    createdAt             DateTime          @default(now())
+    updatedAt             DateTime          @updatedAt
 
     @@index([userId])
     @@index([expiresAt]) // sweep worker scans this
