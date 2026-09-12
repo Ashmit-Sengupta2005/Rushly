@@ -21,7 +21,7 @@ model Reservation {
     /**
      * expiresAt= booked time +10 mins
      * Sweep worker is a background script which runs continuously and scans database looking for rows where
-     * expiresAt is reached and hence inorder to process millions of orders with ease we index at expiresAt
+     * expiresAt is reached and hence in order to process millions of orders with ease we index at expiresAt
      */
     items                 ReservationItem[]
     order                 Order? // populated after successful payment
