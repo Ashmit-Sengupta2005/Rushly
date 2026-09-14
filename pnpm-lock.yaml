@@ -52,6 +52,9 @@ importers:
       pino-http:
         specifier: ^11.0.0
         version: 11.0.0
+      stripe:
+        specifier: ^22.6.2
+        version: 22.6.2(@types/node@26.4.0)
       zod:
         specifier: ^4.4.3
         version: 4.5.4
@@ -2230,6 +2233,15 @@ packages:
   strip-json-comments@5.0.3:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
+
+  stripe@22.6.2:
+    resolution: {integrity: sha512-PwRE2scocvXqDKPiskMa5vRJEAEkq46W69XyUYmAwrNSLr675lQnfqLwnsndAWizwgihOWw/irLmoFRo3ez7ew==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -4451,6 +4463,10 @@ snapshots:
   std-env@3.10.0: {}
 
   strip-json-comments@5.0.3: {}
+
+  stripe@22.6.2(@types/node@26.4.0):
+    optionalDependencies:
+      '@types/node': 26.4.0
 
   supports-color@5.5.0:
     dependencies:
