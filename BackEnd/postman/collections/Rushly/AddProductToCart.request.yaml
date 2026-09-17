@@ -1,0 +1,9 @@
+$kind: http-request
+url: http://localhost:4000/api/cart/items
+method: POST
+headers:
+  Authorization: "{{bearer_token_173f}}"
+body:
+  type: json
+  content: '{"productId":"cmtjbglp50005igu4moeuywll","quantity":1}'
+order: 4389868372750702

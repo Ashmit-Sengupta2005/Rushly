@@ -1,0 +1,7 @@
+$kind: http-request
+url: http://localhost:4000/api/auth/login
+method: POST
+body:
+  type: json
+  content: "{\"email\":\"admin@rushly.local\",\"password\":\"admin_dev_password_change_me\"}\r\n"
+order: 3436274666202402

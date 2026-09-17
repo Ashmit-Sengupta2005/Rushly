@@ -44,10 +44,14 @@ export const reservationService={
         });
       }
     }
-    // Generate the reservation id and per-item hold ids upfront.
+    // Generate per-item hold ids upfront.
     // We need holdIds BEFORE calling Redis so we can pass them to the Lua
     // script and store them in Postgres in the same shape.
-    const reservationId = randomUUID();
+    // NOTE: the reservation's own id is intentionally NOT pre-generated here.
+    // Every other model relies on Prisma's `@default(cuid())`, and
+    // createPaymentIntentSchema validates reservationId with z.cuid2() —
+    // randomUUID() output (hyphenated) fails that check. Let Postgres assign
+    // the id so it matches the same shape as every other id in the system.
     const itemsWithHolds = cart.items.map((item) => ({
       cartItem: item,
       holdId: randomUUID(),
@@ -101,7 +105,6 @@ export const reservationService={
     try{
         const reservation=await prisma.reservation.create({
             data:{
-                id:reservationId,
                 userId,
                 status:'PENDING',
                 expiresAt,
@@ -160,7 +163,10 @@ export const reservationService={
     catch(dbErr){
         // Postgres write failed AFTER Redis holds were created. Roll back
       // Redis so we don't strand stock. Same compensation pattern.
-      logger.error({ err: dbErr, reservationId }, 'Postgres reservation insert failed');
+      logger.error(
+        { err: dbErr, userId, holdIds: successfulHolds.map((h) => h.holdId) },
+        'Postgres reservation insert failed',
+      );
       await Promise.allSettled(
         successfulHolds.map((h) => releaseStock(h)),
       );
