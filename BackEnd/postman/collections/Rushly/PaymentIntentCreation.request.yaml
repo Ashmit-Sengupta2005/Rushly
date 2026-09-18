@@ -1,4 +1,13 @@
 $kind: http-request
-url: ""
-method: GET
+url: http://localhost:4000/api/checkout/pay
+method: POST
+headers:
+  Authorization: Bearer {{customer_bearer_token}}
+body:
+  type: json
+  content: "{\r
+
+    \  \"reservationId\": \"{{reservation_id}}\"\r
+
+    }"
 order: 4502068299213926

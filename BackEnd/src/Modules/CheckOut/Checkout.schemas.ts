@@ -3,5 +3,5 @@ import {z} from "zod";
 // This is deliberate: you never trust the client to tell you what to reserve.
 // The cart is the source of truth.
 export const reservationIdParamsSchema = z.object({
-  id: z.uuid(),
+  id: z.cuid2(),
 })

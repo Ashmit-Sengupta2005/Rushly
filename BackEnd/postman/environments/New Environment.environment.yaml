@@ -1,0 +1,12 @@
+name: New Environment
+values:
+  - key: admin_bearer_token
+    secret: true
+  - key: customer_bearer_token
+    secret: true
+  - key: reservation_id
+    value: ''
+  - key: paymentIntentId
+    value: ''
+  - key: clientSecret
+    value: ''
