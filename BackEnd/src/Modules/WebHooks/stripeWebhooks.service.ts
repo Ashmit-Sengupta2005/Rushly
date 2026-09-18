@@ -1,4 +1,5 @@
 import type Stripe from "stripe";
+import { stripe } from "../../config/stripe.js";
 import { prisma } from "../../config/prisma.js";
 import { logger } from "../../utils/logger.js";
 import { consumeHold, releaseStock, syncProductStock } from "../CheckOut/Inventory.redis.js";
@@ -224,14 +225,23 @@ export const stripeWebhookService = {
       );
       return;
     }
-    // Stripe's `charge.refunded` event fires with the charge object which
-    // includes `refunds.data` — the list of Refund objects on this charge.
-    // We iterate to find any that we haven't recorded yet.
+    // Stripe's `charge.refunded` event carries a SNAPSHOT of the charge taken
+    // when the event was generated. That snapshot doesn't reliably include an
+    // expanded `refunds.data` list — depending on timing/API version, it can
+    // arrive empty even though the refund genuinely exists on the charge. The
+    // webhook payload is a notification ("something changed"), not a
+    // guaranteed-fresh copy of the object — so when it's empty, we re-fetch
+    // the charge directly from the API with refunds expanded, which IS
+    // authoritative, instead of trusting the possibly-stale embedded copy.
     //
     // For partial refunds, multiple charge.refunded events may fire over time,
     // each with a new Refund in the list. The `Refund.stripeRefundId` unique
     // constraint prevents us from double-recording any single one.
-    const stripeRefunds=charge.refunds?.data ?? [];
+    let stripeRefunds=charge.refunds?.data ?? [];
+    if(stripeRefunds.length===0){
+      const freshCharge=await stripe.charges.retrieve(charge.id,{expand:['refunds']});
+      stripeRefunds=freshCharge.refunds?.data ?? [];
+    }
     if(stripeRefunds.length===0){
       logger.warn(
       { chargeId: charge.id, orderId: order.id },
