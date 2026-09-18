@@ -284,11 +284,13 @@ export const stripeWebhookService = {
       // Real production would ask admin to specify per-item, but for Rushly the
       // simplification is: full refund = full restock; partial refund = money only
        for(const item of order.items){
+        // Only availableStock — the sale never touched totalStock (it's the
+        // lifetime-received ceiling, only admin restocks move it), so undoing
+        // the sale shouldn't inflate it either.
         await tx.inventory.update({
           where:{productId:item.productId},
           data:{
             availableStock:{increment:item.quantity},
-            totalStock:{increment:item.quantity},
             version:{increment:1},},
         });
        }
