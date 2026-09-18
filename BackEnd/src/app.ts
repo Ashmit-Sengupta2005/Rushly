@@ -13,6 +13,7 @@ import { cartRouter } from "./Modules/Cart/Cart.routes.js";
 import { checkoutRouter } from "./Modules/CheckOut/Checkout.routes.js";
 import { stripeWebhookRouter } from "./Modules/WebHooks/stripeWebhooks.routes.js";
 import { adminRouter } from "./Modules/Admin/admin.routes.js";
+import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
 
     const app=express();
     app.use(helmet()); // security and utility middleware
@@ -42,6 +43,7 @@ import { adminRouter } from "./Modules/Admin/admin.routes.js";
     app.use('/api/admin', adminRouter);
     app.use('/api/cart', cartRouter);
     app.use('/api/checkout',checkoutRouter);
+    app.use('/api/orders',ordersRouter);
 
     app.use(errorHandler);
     export default app;
