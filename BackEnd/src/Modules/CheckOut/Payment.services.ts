@@ -74,8 +74,12 @@ export const paymentService={
     const intent=await stripe.paymentIntents.create({
         amount:totalAmount,// in paise — same unit we store
         currency:'inr',
-        // Automatic payment methods = Stripe picks card/UPI/etc based on availability
-        automatic_payment_methods:{enabled:true},
+        // Automatic payment methods = Stripe picks card/UPI/etc based on availability.
+        // allow_redirects: 'never' — Rushly's frontend confirms card payments inline
+        // (Stripe.js) with no browser redirect step. Without this, Stripe requires a
+        // `return_url` on every confirm() call (since some auto-selected methods, like
+        // Link, can redirect), which breaks direct API/CLI confirmation entirely.
+        automatic_payment_methods:{enabled:true,allow_redirects:'never'},
         metadata:{
             reservationId:reservation.id,
             userId:reservation.userId,
