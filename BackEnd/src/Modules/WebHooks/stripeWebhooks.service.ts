@@ -118,6 +118,20 @@ export const stripeWebhookService = {
         where: { id: reservation.id },
         data: { status: "PAID" },
       });
+      // 5. Persist the stock decrement to Postgres — Redis already decremented
+      // the live counter at reservation time (Inventory.redis.ts RESERVE_SCRIPT),
+      // but that's ephemeral. Without this, Postgres availableStock never moves,
+      // and initRedisInventory() reseeds Redis FROM Postgres on every boot,
+      // silently undoing every sale's decrement on restart.
+      for (const item of reservation.items) {
+        await tx.inventory.update({
+          where: { productId: item.productId },
+          data: {
+            availableStock: { decrement: item.quantity },
+            version: { increment: 1 },
+          },
+        });
+      }
     });
     // ========================================================
     // Post-transaction: clean up Redis
