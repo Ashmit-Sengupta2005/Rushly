@@ -13,6 +13,8 @@ const PROCESSING_TIMEOUT_MS = 30000; // consider a "stuck" PROCESSING row as fai
 
 let running=false
 let pollHandle:NodeJS.Timeout|null=null;
+let cyclesRun = 0;
+let eventsProcessed = 0;
 
 // ============================================================
 // The dispatcher registry
@@ -172,9 +174,15 @@ async function pollOnce() {
     // Process in parallel — one slow event won't block others.
     // allSettled means one failure doesn't abort the batch.
     await Promise.allSettled(events.map((e) => processEvent(e.id)));
+    // In pollOnce, after processing:
+    cyclesRun++;
+    eventsProcessed += events.length;
+    if (cyclesRun % 60 === 0) {  // every ~5 min
+        logger.info({ cyclesRun, eventsProcessed }, 'Outbox worker heartbeat');}
   } catch (err) {
     logger.error({ err }, 'Outbox poll cycle failed');
   }
+  
 }
 
 // ============================================================
