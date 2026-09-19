@@ -1,8 +1,8 @@
 import {setTimeout as sleep} from 'node:timers/promises';
 import { prisma } from '../config/prisma.js';
 import { logger } from '../utils/logger.js';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
-
+import { emailService } from '../utils/email.service.js';
+import { emailTemplates } from '../utils/email.templates.js';
 // ============================================================
 // Configuration — knobs you might tune
 // ============================================================
@@ -10,6 +10,21 @@ const POLL_INTERVAL_MS = 5000;      // check for new events every 5s
 const BATCH_SIZE = 10;               // process up to 10 events per poll
 const MAX_ATTEMPTS = 5;              // give up after 5 failures per event
 const PROCESSING_TIMEOUT_MS = 30000; // consider a "stuck" PROCESSING row as failed after 30s
+
+// Type-narrow the payload for each event type so we don't have to cast everywhere.
+interface OrderConfirmationPayload {
+  orderId: string;
+  userId: string;
+  totalAmount: number;
+  itemCount: number;
+}
+
+interface RefundConfirmationPayload {
+  orderId: string;
+  userId: string;
+  totalRefunded: number;
+  currency: string;
+}
 
 let running=false
 let pollHandle:NodeJS.Timeout|null=null;
@@ -26,19 +41,64 @@ type Dispatcher = (payload: unknown) => Promise<void>;
 
 const dispatchers: Record<string, Dispatcher> = {
   order_confirmation: async (payload) => {
-    // In production: sendGrid.send({ to: userEmail, template: 'order_confirmation', vars: payload })
-    logger.info({ payload }, '📧 [DISPATCH] Would send order confirmation email');
-    // Simulate network latency so testing feels realistic
-    await sleep(50);
+    const data = payload as OrderConfirmationPayload;
+
+    // Fetch user's email — the payload only has userId. We do this at dispatch
+    // time rather than at enqueue time so if the user updates their email
+    // between order and email send, we send to the current email.
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { email: true, name: true },
+    });
+
+    if (!user) {
+      // User was deleted between order and email — nothing to send. Not really
+      // a failure, but log it and don't retry (the user's not coming back).
+      throw new Error(`User ${data.userId} not found`);
+    }
+
+    const template = emailTemplates.orderConfirmation({
+      customerName: user.name,
+      orderId: data.orderId,
+      totalAmount: data.totalAmount,
+      currency: 'INR',
+      itemCount: data.itemCount,
+    });
+
+    await emailService.send({
+      to: user.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
   },
 
   refund_confirmation: async (payload) => {
-    // In production: sendGrid.send({ to: userEmail, template: 'refund_confirmation', vars: payload })
-    logger.info({ payload }, '📧 [DISPATCH] Would send refund confirmation email');
-    await sleep(50);
+    const data = payload as RefundConfirmationPayload;
+
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { email: true, name: true },
+    });
+
+    if (!user) throw new Error(`User ${data.userId} not found`);
+
+    const template = emailTemplates.refundConfirmation({
+      customerName: user.name,
+      orderId: data.orderId,
+      totalRefunded: data.totalRefunded,
+      currency: data.currency,
+    });
+
+    await emailService.send({
+      to: user.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
   },
-  // Add more as needed: password_reset, order_shipped, etc.
 };
+  // Add more as needed: password_reset, order_shipped, etc.
 
 /**
  * Atomically claim one event by transitioning PENDING → PROCESSING.
