@@ -16,6 +16,9 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
   STRIPE_API_VERSION: z.string().default('2026-08-26.dahlia'),
+  BREVO_API_KEY: z.string().startsWith('xkeysib-'),
+  EMAIL_FROM: z.string().email(),
+  EMAIL_FROM_NAME: z.string().default('Rushly'),
 });
 
 const parsed = schema.safeParse(process.env);
