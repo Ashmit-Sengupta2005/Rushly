@@ -111,6 +111,9 @@ export const catalogService={
                 inventory: true,
             }
             });
+        await syncProductStock(product.id);
+        // Invalidate list caches — a new product might appear in any listing
+    await cacheService.delPattern(cacheKeys.productListPattern());
         return product;}
     catch(err){
         if(err instanceof PrismaClientKnownRequestError && err.code==='P2002'){
