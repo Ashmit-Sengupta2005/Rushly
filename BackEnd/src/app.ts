@@ -5,8 +5,9 @@ import cookieParser from 'cookie-parser';
 import {pinoHttp} from 'pino-http';
 import { env } from "./config/.env.js";
 import { logger } from './utils/logger.js'
-import { errorHandler } from "./Middlewares/errorHandler.js"
-import { systemRouter } from "./Modules/System/System.route.js"
+import { errorHandler } from "./Middlewares/errorHandler.js";
+import {rateLimit} from "./utils/rateLimiter.js"
+import { systemRouter } from "./Modules/System/System.route.js";
 import { authRouter } from "./Modules/Auth/Auth.routes.js"
 import { catalogRouter,catalogAdminRouter } from "./Modules/Catalog/Catalog.routes.js";
 import { cartRouter } from "./Modules/Cart/Cart.routes.js";
@@ -16,6 +17,9 @@ import { adminRouter } from "./Modules/Admin/admin.routes.js";
 import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
 
     const app=express();
+    // Enable when deployed behind a proxy (Railway, Render, nginx).
+    // Makes req.ip use X-Forwarded-For correctly.
+    app.set('trust proxy',1);
     app.use(helmet()); // security and utility middleware
     app.use(cors({origin:env.CORS_ORIGIN,credentials:true}));
     // ========================================================
@@ -35,6 +39,7 @@ import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
     app.use(express.json({limit:'1mb'}));
     app.use(cookieParser());// populates req.cookies from the Cookie header
     app.use(pinoHttp({ logger }));
+    app.use('/api', rateLimit.general);
 
     app.use('/api',systemRouter);
     app.use('/api/auth',authRouter);
