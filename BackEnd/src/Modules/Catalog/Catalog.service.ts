@@ -4,12 +4,35 @@ import { syncProductStock } from '../CheckOut/Inventory.redis.js';
 import { errors } from '../../utils/Errors.js';
 import { logger } from '../../utils/logger.js';
 import type { ListProductsQuery,CreateProductInput,UpdateProductInput,AdjustInventoryInput } from './Catalog.schemas.js';
+import { cacheService, cacheKeys} from '../../utils/cache.service.js';
+import crypto from 'node:crypto';
 
 // include is used for strictly reading results on the basis of joins 
 
 export const catalogService={
     async listProducts(query:ListProductsQuery){
-        // Cursor pagination pattern: fetch limit+1, use the extra to detect
+      // Cache key includes all query params so different filters get different caches.
+      // Hash the query to keep keys short and safe (no special chars in keys).
+    const queryHash = crypto
+    .createHash('md5')
+    .update(JSON.stringify(query))
+    .digest('hex')
+    .slice(0, 12);
+
+    const cacheKey = cacheKeys.productList(queryHash);
+    
+    // Try cache first
+  const cached = await cacheService.get<{
+    items: unknown[];
+    nextCursor: string | null;
+    hasMore: boolean;
+  }>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+   // Cache miss — hit Postgres (existing code, unchanged)
+    // Cursor pagination pattern: fetch limit+1, use the extra to detect
     // whether there's a next page; the last item's id becomes the next cursor.
     const products=await prisma.product.findMany({
         where:{
@@ -35,7 +58,10 @@ export const catalogService={
     const hasMore = products.length > query.limit;
     const items = hasMore ? products.slice(0, query.limit) : products;
     const nextCursor = hasMore ? items[items.length - 1].id : null;
-    return { items, nextCursor, hasMore };
+    const result={ items, nextCursor, hasMore };
+    // Populate cache for next request. Short TTL so stock data doesn't get too stale.
+    await cacheService.set(cacheKey, result, 60); // 1 min for lists (stock changes)
+    return result;
 },
     async getProductBySlug(slug:string){
         const product = await prisma.product.findUnique({
