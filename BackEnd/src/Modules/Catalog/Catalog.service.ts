@@ -147,10 +147,13 @@ export const catalogService={
         // Soft-delete: mark inactive rather than DELETE. Historical orders
         // reference product; hard-delete would orphan them.
     try {
-      await prisma.product.update({
+      const product=await prisma.product.update({
         where: { id },
         data: { isActive: false },
       });
+      // Invalidate caches so the "deleted" product disappears from listings
+      await cacheService.del(cacheKeys.productBySlug(product.slug));
+      await cacheService.delPattern(cacheKeys.productListPattern());
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError && err.code === 'P2025') {
         throw errors.notFound('PRODUCT_NOT_FOUND', 'Product does not exist');
