@@ -64,6 +64,9 @@ export const catalogService={
     return result;
 },
     async getProductBySlug(slug:string){
+        const cacheKey = cacheKeys.productBySlug(slug);
+        const cached = await cacheService.get<unknown>(cacheKey);
+        if (cached) return cached;
         const product = await prisma.product.findUnique({
         where: { slug },
         include: {
@@ -74,6 +77,8 @@ export const catalogService={
     });
     if (!product || !product.isActive) {
       throw errors.notFound('PRODUCT_NOT_FOUND', 'Product does not exist');}
+    // Cache for 5 min — product metadata rarely changes; inventory is fetched fresh via cache miss
+    await cacheService.set(cacheKey, product, 300);
     return product;
     },
     async createProduct(input:CreateProductInput){
