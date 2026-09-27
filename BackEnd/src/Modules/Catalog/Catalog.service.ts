@@ -131,6 +131,9 @@ export const catalogService={
           inventory: true,
         },
       });
+      // Invalidate both the direct product cache and any list that might include it
+    await cacheService.del(cacheKeys.productBySlug(product.slug));
+    await cacheService.delPattern(cacheKeys.productListPattern());
       return product;
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError && err.code === 'P2025') {
