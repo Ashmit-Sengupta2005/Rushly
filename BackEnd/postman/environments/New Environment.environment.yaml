@@ -10,3 +10,5 @@ values:
     value: ''
   - key: clientSecret
     value: ''
+  - key: productId
+    value: ''

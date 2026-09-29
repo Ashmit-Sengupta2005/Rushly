@@ -101,7 +101,7 @@ function limitByIP(limiter:RateLimiterRedis){
     // Exported middleware — ready to use in route files
     // 
     export const rateLimit={
-        auth:limitByIP(generalLimiter),
+        auth:limitByIP(authLimiter),
         checkout:limitByUser(checkoutLimiter),
         general:limitByIP(generalLimiter),
     };
