@@ -13,6 +13,8 @@ import { fetch } from 'undici';
 const BASE = 'http://localhost:4000/api';
 const N = 50;
 const STOCK = 10;
+// Set to a valid access token before running: TOKEN=... tsx src/scripts/Oversell-test.ts
+const TOKEN = process.env.TOKEN ?? '';
 
 // You'll need to seed N users and log them all in to get N access tokens.
 // For a quick smoke test, use one user + one product + qty=1 in cart, then
