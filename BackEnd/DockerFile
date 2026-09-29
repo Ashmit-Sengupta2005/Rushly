@@ -1,20 +1,43 @@
-FROM node:20-alpine AS build
-WORKDIR /app
-RUN apk add --no-cache openssl
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable && pnpm install --frozen-lockfile
-COPY prisma ./prisma
-RUN pnpm exec prisma generate
-COPY . .
-RUN pnpm run build
+# Build context must be the REPO ROOT, not BackEnd/ — this is a pnpm workspace
+# and pnpm-lock.yaml / pnpm-workspace.yaml live at the repo root, not in BackEnd/.
+# On Render: Root Directory = (blank), Dockerfile Path = BackEnd/DockerFile
 
-FROM node:20-alpine
+# Debian-slim (glibc), not Alpine (musl): argon2 is a native module and on musl
+# node-gyp must download special "unofficial" musl headers over the network,
+# which is unreliable in sandboxed/CI build environments. glibc avoids that.
+FROM node:20-slim AS build
 WORKDIR /app
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# `prisma generate` (runs via postinstall) only reads the schema file — it never
+# connects to a real database — but prisma.config.ts resolves DATABASE_URL
+# eagerly, so it needs *some* value at build time. The real one is injected by
+# Render at runtime and is not available during the build, so this placeholder
+# is build-only and never used to actually connect anywhere.
+ENV DATABASE_URL="postgresql://user:password@localhost:5432/db"
+
+# Workspace files first (small, cacheable), including backend's prisma schema
+# so `postinstall: prisma generate` succeeds during `pnpm install` below.
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY BackEnd/package.json BackEnd/prisma.config.ts ./BackEnd/
+COPY BackEnd/src/prisma ./BackEnd/src/prisma
+COPY FrontEnd/package.json ./FrontEnd/package.json
+
+RUN corepack enable && pnpm install --frozen-lockfile
+
+COPY BackEnd ./BackEnd
+RUN pnpm --filter backend run build
+
+FROM node:20-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/src/generated ./src/generated
-COPY package.json ./
+COPY --from=build /app/BackEnd ./BackEnd
+
+WORKDIR /app/BackEnd
 EXPOSE 4000
 CMD ["node", "dist/server.js"]

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { Role } from '@prisma/client';
+import type { Role } from '../../generated/prisma/client.js';
 import { errors } from '../../utils/Errors.js';
 import { verifyAccessToken } from './Auth.tokens.js';
 

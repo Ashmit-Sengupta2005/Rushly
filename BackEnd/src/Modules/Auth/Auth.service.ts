@@ -1,5 +1,5 @@
 import argon2,{type HashOptions} from 'argon2';
-import { Role,type User } from '@prisma/client';
+import { Role,type User } from '../../generated/prisma/client.js';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import {prisma} from "../../config/prisma.js"
 import { errors } from '../../utils/Errors.js';

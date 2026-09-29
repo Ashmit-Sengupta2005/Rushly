@@ -4,7 +4,7 @@ formats them into a clean JSON response instead of a raw HTML error page.*/
 
 import { Request,Response,NextFunction } from "express";
 import { logger } from "../utils/logger.js";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma/client.js";
 import { AppError } from "../utils/Errors.js";
 // Known application errors — return their shape directly.
 export const errorHandler=

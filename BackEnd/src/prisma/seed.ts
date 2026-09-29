@@ -1,4 +1,4 @@
-import {  Role } from '@prisma/client';
+import {  Role } from '../generated/prisma/client.js';
 import 'dotenv/config'
 import { createPrismaClient } from './prisma.config.js';
 import argon2 from 'argon2';

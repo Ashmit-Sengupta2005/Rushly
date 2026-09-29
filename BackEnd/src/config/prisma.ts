@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../generated/prisma/client.js";
 import { createPrismaClient } from "../prisma/prisma.config.js";
 import { env } from "./.env.js";
 //? Trivial development phase optimization
