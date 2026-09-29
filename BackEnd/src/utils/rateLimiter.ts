@@ -73,7 +73,12 @@ function limitByIP(limiter:RateLimiterRedis){
             next();
         }
         catch(err:any){
-            // rate-limiter-flexible throws with metadata about remaining time
+            // rate-limiter-flexible rejects with a RateLimiterRes (has msBeforeNext) when the
+            // limit is actually exceeded. Any other error (e.g. Redis unreachable) means we
+            // couldn't check the limit at all — fail open rather than blocking everyone.
+            if (typeof err?.msBeforeNext !== 'number') {
+                return next();
+            }
             const retryAfterSec = Math.ceil(err.msBeforeNext / 1000) || 60;
             _res.setHeader('Retry-After', retryAfterSec);
             next(errors.tooMany('RATE_LIMITED', `Too many requests. Try again in ${retryAfterSec}s.`));
@@ -92,6 +97,11 @@ function limitByIP(limiter:RateLimiterRedis){
                 await limiter.consume(key);
                 next();}
             catch (rateLimitInfo: any) {
+                // Same fail-open logic as limitByIP: only block when it's a genuine
+                // over-the-limit rejection, not a Redis/connection failure.
+                if (typeof rateLimitInfo?.msBeforeNext !== 'number') {
+                    return next();
+                }
                 const retryAfterSec = Math.ceil(rateLimitInfo.msBeforeNext / 1000) || 60;
                 _res.setHeader('Retry-After', retryAfterSec);
                 next(errors.tooMany('RATE_LIMITED', `Too many requests. Try again in ${retryAfterSec}s.`));}
