@@ -40,4 +40,6 @@ COPY --from=build /app/BackEnd ./BackEnd
 
 WORKDIR /app/BackEnd
 EXPOSE 4000
-CMD ["node", "dist/server.js"]
+# Apply any pending migrations against the real DATABASE_URL (only available at
+# runtime, not build time) before booting the server.
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/server.js"]
