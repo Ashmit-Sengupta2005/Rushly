@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { redis } from '../config/redis.js';
+import { reservationExpiryQueue, reservationExpiryEvents } from '../config/queues.js';
 import { reservationService } from '../Modules/CheckOut/Reservation.service.js';
 import { loadInventoryScripts, syncProductStock } from '../Modules/CheckOut/Inventory.redis.js';
 
@@ -58,6 +59,12 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    // Close every connection the imported modules opened (including the
+    // BullMQ queue's Redis connections), otherwise Node never exits.
+    await Promise.all([
+      prisma.$disconnect(),
+      reservationExpiryQueue.close(),
+      reservationExpiryEvents.close(),
+    ]);
     redis.disconnect();
   });
