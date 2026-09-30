@@ -1,5 +1,5 @@
 $kind: http-request
-url: http://localhost:4000/api/cart
+url: "{{baseURL}}/cart"
 method: GET
 headers:
   Authorization: Bearer {{customer_bearer_token}}

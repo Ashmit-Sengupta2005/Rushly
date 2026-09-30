@@ -12,3 +12,13 @@ values:
     value: ''
   - key: productId
     value: ''
+  - key: baseURL
+    value: ''
+  - key: customerEmail
+    value: ''
+  - key: customerPassword
+    value: ''
+  - key: CartID
+    value: ''
+  - key: orderId
+    value: ''

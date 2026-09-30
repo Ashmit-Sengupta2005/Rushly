@@ -1,11 +1,9 @@
 $kind: http-request
-name: PaymentIntentForAnotherUserReservation
-url: 'http://localhost:4000/api/checkout/pay'
+url: "{{baseURL}}/checkout/pay"
 method: POST
 order: 4502800782917860
 headers:
-  - key: Authorization
-    value: 'Bearer {{admin_bearer_token}}'
+  Authorization: Bearer {{admin_bearer_token}}
 body:
   type: json
   content: |-
