@@ -99,6 +99,20 @@ let consumeSha: string;
 // ============================================================
 
 /**
+ * Load the Lua scripts into Redis's script cache and remember their SHA1
+ * hashes for EVALSHA. The server does this via initRedisInventory(); standalone
+ * scripts that reserve/release stock (without re-seeding) call it directly.
+ */
+export async function loadInventoryScripts() {
+    [reserveSha,releaseSha,consumeSha]=await Promise.all([
+        redis.script('LOAD',RESERVE_SCRIPT) as Promise<string>,
+        redis.script('LOAD',RELEASE_SCRIPT) as Promise<string>,
+        redis.script('LOAD',CONSUME_SCRIPT) as Promise<string>,
+    ]);
+    logger.info({reserveSha,releaseSha,consumeSha},'Loaded Reservation Lua Scripts')
+}
+
+/**
  * Call this once at server boot. Loads Lua scripts into Redis and syncs
  * inventory from Postgres into Redis for every product.
  *
@@ -106,15 +120,7 @@ let consumeSha: string;
  * inventory is a no-op if values haven't drifted.
  */
 export async function initRedisInventory() {
-    // Load scripts into Redis's script cache. Returns SHA1 hashes we'll use
-    // with EVALSHA for cheaper subsequent calls.
-    [reserveSha,releaseSha,consumeSha]=await Promise.all([
-        redis.script('LOAD',RESERVE_SCRIPT) as Promise<string>,
-        redis.script('LOAD',RELEASE_SCRIPT) as Promise<string>,
-        redis.script('LOAD',CONSUME_SCRIPT) as Promise<string>,
-    ]);
-
-    logger.info({reserveSha,releaseSha,consumeSha},'Loaded Reservation Lua Scripts')
+    await loadInventoryScripts();
     // Seed inventory from Postgres. In a real system with millions of products
     // you'd stream this in batches; at Rushly's scale we do it all at once.
     const inventories=await prisma.inventory.findMany({

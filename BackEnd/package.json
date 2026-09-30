@@ -11,7 +11,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write .",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "loadtest:seed": "tsx src/scripts/seed-load-test-users.ts",
+    "loadtest:reset": "tsx src/scripts/reset-load-test.ts"
   },
   "keywords": [],
   "author": "",
