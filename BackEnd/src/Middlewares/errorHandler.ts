@@ -8,7 +8,7 @@ import { Prisma } from "../generated/prisma/client.js";
 import { AppError } from "../utils/Errors.js";
 // Known application errors — return their shape directly.
 export const errorHandler=
- (err:unknown,req:Request,res:Response,next:NextFunction) :Response=>{
+ (err:unknown,req:Request,res:Response,_next:NextFunction) :Response=>{ // 4 params required: Express identifies error handlers by arity
     if(err instanceof AppError){
         logger.warn({err,path:req.path},`AppError:${err.code}`);
     return res.status(err.status).json({

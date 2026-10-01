@@ -3,7 +3,7 @@ import { stripe } from "../../config/stripe.js";
 import { prisma } from "../../config/prisma.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { logger } from "../../utils/logger.js";
-import { consumeHold, releaseStock, syncProductStock } from "../CheckOut/Inventory.redis.js";
+import { consumeHold, syncProductStock } from "../CheckOut/Inventory.redis.js";
 export const stripeWebhookService = {
   /**
  * Process a payment_intent.succeeded event.

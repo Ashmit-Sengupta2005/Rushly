@@ -16,7 +16,7 @@ export interface EmailPayload {
 }
 
 export const emailService={
-    async send(payload:EmailPayload):Promise<{id:String}>{
+    async send(payload:EmailPayload):Promise<{id:string}>{
         try{
             // v6 SDK: sendTransacEmail takes a plain request object (no SendSmtpEmail class),
             // and resolves directly to the response body — no `.body` wrapper.

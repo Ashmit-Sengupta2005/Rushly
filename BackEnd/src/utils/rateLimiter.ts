@@ -1,4 +1,4 @@
-import { RateLimiterRedis } from 'rate-limiter-flexible';
+import { RateLimiterRedis, RateLimiterRes } from 'rate-limiter-flexible';
 import type { Request, Response, NextFunction } from 'express';
 import { redis } from "../config/redis.js";
 import { errors } from "./Errors.js";
@@ -72,11 +72,11 @@ function limitByIP(limiter:RateLimiterRedis){
             await limiter.consume(ip);
             next();
         }
-        catch(err:any){
+        catch(err:unknown){
             // rate-limiter-flexible rejects with a RateLimiterRes (has msBeforeNext) when the
             // limit is actually exceeded. Any other error (e.g. Redis unreachable) means we
             // couldn't check the limit at all — fail open rather than blocking everyone.
-            if (typeof err?.msBeforeNext !== 'number') {
+            if (!(err instanceof RateLimiterRes)) {
                 return next();
             }
             const retryAfterSec = Math.ceil(err.msBeforeNext / 1000) || 60;
@@ -96,10 +96,10 @@ function limitByIP(limiter:RateLimiterRedis){
             try {
                 await limiter.consume(key);
                 next();}
-            catch (rateLimitInfo: any) {
+            catch (rateLimitInfo: unknown) {
                 // Same fail-open logic as limitByIP: only block when it's a genuine
                 // over-the-limit rejection, not a Redis/connection failure.
-                if (typeof rateLimitInfo?.msBeforeNext !== 'number') {
+                if (!(rateLimitInfo instanceof RateLimiterRes)) {
                     return next();
                 }
                 const retryAfterSec = Math.ceil(rateLimitInfo.msBeforeNext / 1000) || 60;
