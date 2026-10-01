@@ -278,15 +278,27 @@ export type OrderStatus =
   | 'CANCELLED'
   | 'REFUNDED';
 
+/**
+ * Display ONLY the *Snapshot fields — they freeze what was bought at purchase
+ * time. Never join to the live Product (renames/price changes would rewrite
+ * order history). No variant fields: the backend has no product variants.
+ */
 export interface OrderItem {
+  id: string;
   productId: string;
   quantity: number;
-  priceSnapshot: number;
+  priceSnapshot: number;            // paise, per unit
   productNameSnapshot: string;
   productImageSnapshot: string | null;
 }
 
+/**
+ * Orders are CREATED already PAID by the Stripe webhook — the first entry is
+ * always { fromStatus: null, toStatus: 'PAID', changedBy: 'System' }.
+ * Later entries: refunds (admin). No polling needed on order pages.
+ */
 export interface OrderStatusHistoryEntry {
+  id: string;
   fromStatus: OrderStatus | null;
   toStatus: OrderStatus;
   reason: string | null;
@@ -301,7 +313,9 @@ export interface OrderListItem {
   currency: 'INR';
   reservationId: string | null;         // nullable in the Prisma schema
   stripePaymentIntentId: string | null; // nullable in the Prisma schema
+  shippingAddress: ShippingAddressInput | null; // null for orders placed before addresses existed
   createdAt: string;
+  updatedAt: string;
   items: OrderItem[];
 }
 
