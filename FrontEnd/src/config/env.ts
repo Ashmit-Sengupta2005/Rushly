@@ -3,8 +3,8 @@
 // scattered across the codebase. One place to catch typos and missing values.
 
 interface Env {
-  API_URL: string;         // e.g. http://localhost:4000
-  API_BASE: string;        // computed: ${API_URL}/api
+  API_URL: string;         // e.g. http://localhost:4000 — or '' for same-origin
+  API_BASE: string;        // computed: ${API_URL}/api  (→ '/api' when same-origin)
   STRIPE_PK: string;
   IS_PRODUCTION: boolean;
 }
@@ -19,7 +19,14 @@ function readRequired(key: string): string {
   return value;
 }
 
-const API_URL = readRequired('VITE_API_URL').replace(/\/$/, ''); // trim trailing slash
+// OPTIONAL. Leave it unset in production: vercel.json proxies /api/* to Render,
+// so the API is same-origin and the httpOnly refresh cookie (sameSite: 'lax')
+// is first-party. Pointing it straight at onrender.com would make the cookie
+// cross-site — browsers drop it and every reload logs the user out.
+// Local dev sets it to http://localhost:4000 (same site as localhost:5173).
+const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? '')
+  .trim()
+  .replace(/\/$/, ''); // trim trailing slash
 const STRIPE_PK = readRequired('VITE_STRIPE_PUBLISHABLE_KEY');
 
 if (!STRIPE_PK.startsWith('pk_')) {
