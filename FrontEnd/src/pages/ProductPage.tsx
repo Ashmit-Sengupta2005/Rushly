@@ -5,6 +5,7 @@ import { useProduct } from '@/features/catalog/useProduct';
 import { useAddToCart } from '@/features/cart/useAddToCart';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { formatMoney } from '@/lib/formatMoney';
+import { Navbar } from '@/components/layout/Navbar';
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -49,17 +50,17 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to catalog
-          </Link>
-        </div>
-      </header>
+      <Navbar />
+      {/* Page-level back link (not navigation) stays with the page */}
+      <div className="max-w-4xl mx-auto px-4 md:px-8 pt-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to catalog
+        </Link>
+      </div>
 
       <main className="max-w-4xl mx-auto p-4 md:p-8 grid md:grid-cols-2 gap-8">
         <div className="aspect-square bg-muted rounded-lg overflow-hidden">

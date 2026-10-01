@@ -12,6 +12,7 @@ import CartPage from '@/pages/CartPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import PaymentPage from '@/pages/PaymentPage';
 import CheckoutCompletePage from '@/pages/CheckoutCompletePage';
+import OrdersPage from '@/pages/OrdersPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
@@ -72,6 +73,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <CheckoutCompletePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <OrdersPage />
                 </ProtectedRoute>
               }
             />

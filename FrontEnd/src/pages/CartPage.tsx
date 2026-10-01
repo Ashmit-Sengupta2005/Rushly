@@ -4,25 +4,24 @@ import { useCart } from '@/features/cart/useCart';
 import { CartItemRow } from '@/features/cart/CartItemRow';
 import { CartSummary } from '@/features/cart/CartSummary';
 import { buttonVariants } from '@/components/ui/button';
+import { Navbar } from '@/components/layout/Navbar';
 
 export default function CartPage() {
   const { data: cart, isLoading, isError } = useCart();
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Continue shopping
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Page-level back link (not navigation) stays with the page */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Continue shopping
+        </Link>
         <h1 className="text-2xl font-bold mb-6">Your cart</h1>
 
         {isLoading && (

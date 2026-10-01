@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useReservation } from '@/features/checkout/useReservation';
 import { buttonVariants } from '@/components/ui/button';
 import { queryKeys } from '@/config/queryClient';
+import type { OrderDetailLocationState } from '@/pages/OrderDetailPage';
 
 // Give the webhook this long before showing "still confirming". 60 s of 3 s
 // polling = 20 requests, which stays under the 30/min checkout rate limit.
@@ -44,7 +45,9 @@ export default function CheckoutCompletePage() {
     // New order exists → any cached order list is stale
     qc.invalidateQueries({ queryKey: queryKeys.orders.all });
     // Brief pause so the success state is visible
-    const t = setTimeout(() => navigate(`/orders/${orderId}`, { replace: true }), 1200);
+    // justPlaced → OrderDetailPage shows the "order confirmed" banner (only on this redirect)
+    const state: OrderDetailLocationState = { justPlaced: true };
+    const t = setTimeout(() => navigate(`/orders/${orderId}`, { replace: true, state }), 1200);
     return () => clearTimeout(t);
   }, [orderId, navigate, qc]);
 
