@@ -11,6 +11,9 @@ const schema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('7d'),
   CORS_ORIGIN: z.string().url(),
+  // Proxies in front of the app (see app.ts 'trust proxy'). 1 = Render only;
+  // 2 = Vercel /api rewrite → Render.
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   RESERVATION_TTL_SEC: z.coerce.number().default(600),
   BULLMQ_QUEUE_PREFIX: z.string().default('rushly'),
   STRIPE_SECRET_KEY: z.string().startsWith('sk_'),

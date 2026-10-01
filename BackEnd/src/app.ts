@@ -18,9 +18,14 @@ import { adminRouter } from "./Modules/Admin/admin.routes.js";
 import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
 
     const app=express();
-    // Enable when deployed behind a proxy (Railway, Render, nginx).
-    // Makes req.ip use X-Forwarded-For correctly.
-    app.set('trust proxy',1);
+    // Number of proxies in front of the app whose X-Forwarded-For entries we trust.
+    // req.ip feeds the per-IP rate limiters, so this MUST match the real chain:
+    //   1 = Render's load balancer only (browser → Render)
+    //   2 = Vercel's /api rewrite + Render (browser → Vercel → Render)
+    // Too low → every user gets the proxy's IP and shares ONE rate-limit bucket
+    // (e.g. 5 logins/min for the whole site). Too high → clients can spoof their
+    // IP via X-Forwarded-For. Verify with the `clientIp` field in request logs.
+    app.set('trust proxy', env.TRUST_PROXY_HOPS);
     app.use(helmet()); // security and utility middleware
     app.use(cors({origin:env.CORS_ORIGIN,credentials:true}));
     // ========================================================
@@ -39,7 +44,8 @@ import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
   // JSON parsing for everything else
     app.use(express.json({limit:'1mb'}));
     app.use(cookieParser());// populates req.cookies from the Cookie header
-    app.use(pinoHttp({ logger }));
+    // clientIp = what the rate limiters see; check it matches your real IP after deploys
+    app.use(pinoHttp({ logger, customProps: (req) => ({ clientIp: (req as express.Request).ip }) }));
     app.use('/api', rateLimit.general);
 
     app.use('/api',systemRouter);
