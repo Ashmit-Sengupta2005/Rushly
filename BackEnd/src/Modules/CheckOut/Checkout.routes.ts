@@ -4,14 +4,17 @@ import { requireAuth } from "../Auth/Auth.middleware.js";
 import {rateLimit} from '../../utils/rateLimiter.js';
 import { checkoutController } from "./Checkout.controller.js";
 import { paymentController } from "./Payment.controllers.js";
-import { reservationIdParamsSchema } from "./Checkout.schemas.js";
+import { reservationIdParamsSchema,createReservationSchema } from "./Checkout.schemas.js";
 import { createPaymentIntentSchema } from "./Payment.schemas.js";
 
 export const checkoutRouter=Router();
 checkoutRouter.use(requireAuth);
 checkoutRouter.use(rateLimit.checkout);  // Apply to ALL checkout routes
 
-checkoutRouter.post('/reserve',checkoutController.reserve);
+checkoutRouter.post('/reserve',
+    validate.body(createReservationSchema),
+    checkoutController.reserve,
+);
 checkoutRouter.get('/reservations/:id',
     validate.params(reservationIdParamsSchema),
     checkoutController.getReservation,

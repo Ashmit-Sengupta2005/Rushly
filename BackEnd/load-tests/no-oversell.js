@@ -25,6 +25,17 @@ const NUM_USERS = parseInt(__ENV.NUM_USERS || '500');
 const ARRIVAL_WINDOW_SEC = parseFloat(__ENV.ARRIVAL_WINDOW_SEC || '2');
 const PASSWORD = 'loadtest_password';
 const SETUP_BATCH = 25;
+// /checkout/reserve requires a shipping address (validated server-side)
+const RESERVE_BODY = JSON.stringify({
+  shippingAddress: {
+    fullName: 'Load Test',
+    phone: '9999999999',
+    line1: '1 Test Street',
+    city: 'Kolkata',
+    state: 'West Bengal',
+    pincode: '700001',
+  },
+});
 
 const reservationSuccess = new Counter('reservation_success');
 const reservationOutOfStock = new Counter('reservation_out_of_stock');
@@ -98,7 +109,7 @@ export default function (data) {
   const i = __VU - 1;
   sleep(Math.random() * ARRIVAL_WINDOW_SEC);
 
-  const reserveRes = http.post(`${BASE_URL}/checkout/reserve`, null, {
+  const reserveRes = http.post(`${BASE_URL}/checkout/reserve`, RESERVE_BODY, {
     headers: headersFor(i, data.tokens[i]),
     tags: { name: 'reserve' },
     responseCallback: http.expectedStatuses(201, 409),

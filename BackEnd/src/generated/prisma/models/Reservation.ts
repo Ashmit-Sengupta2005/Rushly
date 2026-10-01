@@ -50,6 +50,7 @@ export type ReservationCountAggregateOutputType = {
   status: number
   expiresAt: number
   stripePaymentIntentId: number
+  shippingAddress: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -82,6 +83,7 @@ export type ReservationCountAggregateInputType = {
   status?: true
   expiresAt?: true
   stripePaymentIntentId?: true
+  shippingAddress?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -165,6 +167,7 @@ export type ReservationGroupByOutputType = {
   status: $Enums.ReservationStatus
   expiresAt: Date
   stripePaymentIntentId: string | null
+  shippingAddress: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: ReservationCountAggregateOutputType | null
@@ -196,6 +199,7 @@ export type ReservationWhereInput = {
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Reservation"> | string | null
+  shippingAddress?: Prisma.JsonNullableFilter<"Reservation">
   createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -209,6 +213,7 @@ export type ReservationOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  shippingAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -225,6 +230,7 @@ export type ReservationWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Reservation"> | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  shippingAddress?: Prisma.JsonNullableFilter<"Reservation">
   createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -238,6 +244,7 @@ export type ReservationOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  shippingAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ReservationCountOrderByAggregateInput
@@ -254,6 +261,7 @@ export type ReservationScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumReservationStatusWithAggregatesFilter<"Reservation"> | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   stripePaymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"Reservation"> | string | null
+  shippingAddress?: Prisma.JsonNullableWithAggregatesFilter<"Reservation">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
 }
@@ -263,6 +271,7 @@ export type ReservationCreateInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReservationsInput
@@ -276,6 +285,7 @@ export type ReservationUncheckedCreateInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ReservationItemUncheckedCreateNestedManyWithoutReservationInput
@@ -287,6 +297,7 @@ export type ReservationUpdateInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
@@ -300,6 +311,7 @@ export type ReservationUncheckedUpdateInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ReservationItemUncheckedUpdateManyWithoutReservationNestedInput
@@ -312,6 +324,7 @@ export type ReservationCreateManyInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -321,6 +334,7 @@ export type ReservationUpdateManyMutationInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -331,6 +345,7 @@ export type ReservationUncheckedUpdateManyInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -346,6 +361,7 @@ export type ReservationCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   stripePaymentIntentId?: Prisma.SortOrder
+  shippingAddress?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -466,6 +482,7 @@ export type ReservationCreateWithoutOrderInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReservationsInput
@@ -478,6 +495,7 @@ export type ReservationUncheckedCreateWithoutOrderInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ReservationItemUncheckedCreateNestedManyWithoutReservationInput
@@ -504,6 +522,7 @@ export type ReservationUpdateWithoutOrderInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
@@ -516,6 +535,7 @@ export type ReservationUncheckedUpdateWithoutOrderInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ReservationItemUncheckedUpdateManyWithoutReservationNestedInput
@@ -526,6 +546,7 @@ export type ReservationCreateWithoutItemsInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReservationsInput
@@ -538,6 +559,7 @@ export type ReservationUncheckedCreateWithoutItemsInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   order?: Prisma.OrderUncheckedCreateNestedOneWithoutReservationInput
@@ -564,6 +586,7 @@ export type ReservationUpdateWithoutItemsInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
@@ -576,6 +599,7 @@ export type ReservationUncheckedUpdateWithoutItemsInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUncheckedUpdateOneWithoutReservationNestedInput
@@ -586,6 +610,7 @@ export type ReservationCreateWithoutUserInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ReservationItemCreateNestedManyWithoutReservationInput
@@ -597,6 +622,7 @@ export type ReservationUncheckedCreateWithoutUserInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ReservationItemUncheckedCreateNestedManyWithoutReservationInput
@@ -638,6 +664,7 @@ export type ReservationScalarWhereInput = {
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   stripePaymentIntentId?: Prisma.StringNullableFilter<"Reservation"> | string | null
+  shippingAddress?: Prisma.JsonNullableFilter<"Reservation">
   createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
 }
@@ -647,6 +674,7 @@ export type ReservationCreateManyUserInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   stripePaymentIntentId?: string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -656,6 +684,7 @@ export type ReservationUpdateWithoutUserInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ReservationItemUpdateManyWithoutReservationNestedInput
@@ -667,6 +696,7 @@ export type ReservationUncheckedUpdateWithoutUserInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ReservationItemUncheckedUpdateManyWithoutReservationNestedInput
@@ -678,6 +708,7 @@ export type ReservationUncheckedUpdateManyWithoutUserInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stripePaymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shippingAddress?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -719,6 +750,7 @@ export type ReservationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   status?: boolean
   expiresAt?: boolean
   stripePaymentIntentId?: boolean
+  shippingAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -733,6 +765,7 @@ export type ReservationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   status?: boolean
   expiresAt?: boolean
   stripePaymentIntentId?: boolean
+  shippingAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -744,6 +777,7 @@ export type ReservationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   status?: boolean
   expiresAt?: boolean
   stripePaymentIntentId?: boolean
+  shippingAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -755,11 +789,12 @@ export type ReservationSelectScalar = {
   status?: boolean
   expiresAt?: boolean
   stripePaymentIntentId?: boolean
+  shippingAddress?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "expiresAt" | "stripePaymentIntentId" | "createdAt" | "updatedAt", ExtArgs["result"]["reservation"]>
+export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "expiresAt" | "stripePaymentIntentId" | "shippingAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["reservation"]>
 export type ReservationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Reservation$itemsArgs<ExtArgs>
@@ -815,6 +850,7 @@ export type $ReservationPayload<ExtArgs extends runtime.Types.Extensions.Interna
      *      * if yes next requests are skipped
      */
     stripePaymentIntentId: string | null
+    shippingAddress: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["reservation"]>
@@ -1248,6 +1284,7 @@ export interface ReservationFieldRefs {
   readonly status: Prisma.FieldRef<"Reservation", 'ReservationStatus'>
   readonly expiresAt: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly stripePaymentIntentId: Prisma.FieldRef<"Reservation", 'String'>
+  readonly shippingAddress: Prisma.FieldRef<"Reservation", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Reservation", 'DateTime'>
 }

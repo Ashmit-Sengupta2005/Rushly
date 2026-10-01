@@ -10,6 +10,7 @@ import {rateLimit} from "./utils/rateLimiter.js"
 import { systemRouter } from "./Modules/System/System.route.js";
 import { authRouter } from "./Modules/Auth/Auth.routes.js"
 import { catalogRouter,catalogAdminRouter } from "./Modules/Catalog/Catalog.routes.js";
+import { categoriesRouter } from "./Modules/Catalog/Categories.routes.js";
 import { cartRouter } from "./Modules/Cart/Cart.routes.js";
 import { checkoutRouter } from "./Modules/CheckOut/Checkout.routes.js";
 import { stripeWebhookRouter } from "./Modules/WebHooks/stripeWebhooks.routes.js";
@@ -44,6 +45,7 @@ import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
     app.use('/api',systemRouter);
     app.use('/api/auth',authRouter);
     app.use('/api/products', catalogRouter);
+    app.use('/api/categories', categoriesRouter);
     app.use('/api/admin/products', catalogAdminRouter);
     app.use('/api/admin', adminRouter);
     app.use('/api/cart', cartRouter);

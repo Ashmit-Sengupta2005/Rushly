@@ -3,4 +3,7 @@ url: "{{baseURL}}/checkout/reserve"
 method: POST
 headers:
   Authorization: Bearer {{customer_bearer_token}}
+body:
+  type: json
+  content: '{"shippingAddress":{"fullName":"Test Customer","phone":"9999999999","line1":"1 Test Street","city":"Kolkata","state":"West Bengal","pincode":"700001"}}'
 order: 4499788180272044

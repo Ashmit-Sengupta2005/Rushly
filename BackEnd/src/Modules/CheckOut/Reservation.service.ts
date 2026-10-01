@@ -7,6 +7,7 @@ import { logger } from "../../utils/logger.js";
 import { env } from "../../config/.env.js";
 import { reservationExpiryQueue } from "../../config/queues.js";
 import { reserveStock,releaseStock } from "./Inventory.redis.js";
+import type { ShippingAddressInput } from "./Checkout.schemas.js";
 
 export const reservationService={
     /**
@@ -18,7 +19,7 @@ export const reservationService={
    * row exists in Postgres with matching Redis holds, or nothing changed.
    * There is no in-between state.
    */
-   async createReservation(userId:string){
+   async createReservation(userId:string,shippingAddress:ShippingAddressInput){
     // Load cart with everything needed for the reservation
     const cart= await prisma.cart.findUnique({
         where:{userId},
@@ -108,6 +109,7 @@ export const reservationService={
                 userId,
                 status:'PENDING',
                 expiresAt,
+                shippingAddress, // snapshot; copied to the Order by the payment webhook
                 items:{
                     create:itemsWithHolds.map(({cartItem,holdId})=>({
                         productId:cartItem.productId,
@@ -187,9 +189,12 @@ export const reservationService={
                     },
                 },
             },
+            // Set by the payment webhook once paid — lets the frontend redirect
+            // from the payment-confirmation page straight to /orders/:id.
+            order:{select:{id:true,status:true}},
         },
     });
-    if(!reservation){
+    if(!reservation || reservation.userId!==userId){
         // Don't leak existence: return not found rather than forbidden.
         throw errors.notFound('RESERVATION_NOT_FOUND');
     }
@@ -203,6 +208,8 @@ export const reservationService={
       expiresAt: reservation.expiresAt,
       items: reservation.items,
       totalAmount,
+      shippingAddress: reservation.shippingAddress,
+      order: reservation.order, // null until the webhook marks it PAID
     };
    },
    /**

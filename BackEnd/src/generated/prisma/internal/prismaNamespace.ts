@@ -1902,6 +1902,7 @@ export const ReservationScalarFieldEnum = {
   status: 'status',
   expiresAt: 'expiresAt',
   stripePaymentIntentId: 'stripePaymentIntentId',
+  shippingAddress: 'shippingAddress',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

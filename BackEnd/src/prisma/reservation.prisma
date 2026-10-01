@@ -36,6 +36,9 @@ model Reservation {
      * if yes next requests are skipped
      */
     stripePaymentIntentId String?           @unique // populated when payment intent is created
+    // Snapshot of the address entered at checkout — copied onto the Order when
+    // the payment webhook creates it. Nullable so pre-existing rows stay valid.
+    shippingAddress       Json?
     createdAt             DateTime          @default(now())
     updatedAt             DateTime          @updatedAt
 

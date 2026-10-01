@@ -1,10 +1,13 @@
 import type {Request,Response} from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { reservationService } from './Reservation.service.js';
+import type { CreateReservationInput } from './Checkout.schemas.js';
 
 export const checkoutController={
     reserve:asyncHandler(async(req:Request,res:Response)=>{
-        const reservation = await reservationService.createReservation(req.user!.id);
+        // Body already validated (and trimmed/defaulted) by validate.body()
+        const { shippingAddress } = req.body as CreateReservationInput;
+        const reservation = await reservationService.createReservation(req.user!.id, shippingAddress);
         res.status(201).json({ reservation });
     }),
     getReservation: asyncHandler(async (req: Request, res: Response) => {
