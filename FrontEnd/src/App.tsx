@@ -8,6 +8,7 @@ import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import CatalogPage from '@/pages/catalogPage';
 import ProductPage from '@/pages/productPage';
+import CartPage from '@/pages/cartPage';
 
 export default function App() {
   return (
@@ -31,6 +32,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ProductPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <CartPage />
                 </ProtectedRoute>
               }
             />
