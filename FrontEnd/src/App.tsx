@@ -12,6 +12,8 @@ import CartPage from '@/pages/CartPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import PaymentPage from '@/pages/PaymentPage';
 import CheckoutCompletePage from '@/pages/CheckoutCompletePage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 export default function App() {
   return (
@@ -73,6 +75,17 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Checkout lands here after payment (CheckoutCompletePage → /orders/:id) */}
+            <Route
+              path="/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* Keep LAST — any unknown URL shows a 404 instead of a blank page */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           <Toaster richColors position="top-right" />
         </AuthProvider>
