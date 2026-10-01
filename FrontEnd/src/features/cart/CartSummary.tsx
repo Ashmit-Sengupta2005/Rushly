@@ -1,25 +1,38 @@
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import type { Cart } from '@/types/api';
-import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/formatMoney';
-import { cn } from '@/lib/utils';
 
 export function CartSummary({ cart }: { cart: Cart }) {
-  const itemCount = cart.items.reduce((sum, i) => sum + i.quantity, 0);
+  const navigate = useNavigate();
+
+  // Use the server-computed subtotal: it sums priceSnapshot × quantity, which is
+  // exactly what reserve + Stripe charge. (product.price is the CURRENT price and
+  // can differ — see hasPriceChanges.)
+  const { subtotal } = cart;
+
   // Reserve fails with 409 INSUFFICIENT_STOCK if any line can't be filled,
   // so block checkout here instead of letting the user hit that error.
-  const canCheckout = !cart.hasOutOfStock && cart.items.length > 0;
+  const canCheckout = cart.items.length > 0 && !cart.hasOutOfStock;
 
   return (
-    <aside className="rounded-lg border border-border p-6 space-y-4 h-fit md:sticky md:top-24">
+    <div className="border border-border rounded-lg p-4 space-y-4 sticky top-20 h-fit">
       <h2 className="font-semibold">Order summary</h2>
 
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">
-          Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
-        </span>
-        {/* subtotal = priceSnapshot totals = the amount Stripe will charge */}
-        <span className="font-semibold">{formatMoney(cart.subtotal)}</span>
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span>{formatMoney(subtotal)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-muted-foreground">Calculated at checkout</span>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-border flex justify-between font-semibold">
+        <span>Total</span>
+        <span>{formatMoney(subtotal)}</span>
       </div>
 
       {cart.hasPriceChanges && (
@@ -33,18 +46,14 @@ export function CartSummary({ cart }: { cart: Cart }) {
         </p>
       )}
 
-      {canCheckout ? (
-        <Link to="/checkout" className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>
-          Checkout
-        </Link>
-      ) : (
-        <span
-          aria-disabled="true"
-          className={cn(buttonVariants({ size: 'lg' }), 'w-full pointer-events-none opacity-50')}
-        >
-          Checkout
-        </span>
-      )}
-    </aside>
+      <Button
+        className="w-full"
+        size="lg"
+        disabled={!canCheckout}
+        onClick={() => navigate('/checkout')}
+      >
+        Checkout
+      </Button>
+    </div>
   );
 }

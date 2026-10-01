@@ -4,11 +4,11 @@ import { Toaster } from 'sonner';
 import { queryClient } from '@/config/queryClient';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
-import LoginPage from '@/features/auth/LoginPage';
-import RegisterPage from '@/features/auth/RegisterPage';
-import CatalogPage from '@/pages/catalogPage';
-import ProductPage from '@/pages/productPage';
-import CartPage from '@/pages/cartPage';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import CatalogPage from '@/pages/CatalogPage';
+import ProductPage from '@/pages/ProductPage';
+import CartPage from '@/pages/CartPage';
 
 export default function App() {
   return (
@@ -26,7 +26,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            {/* ProductCard links here by slug — backend looks products up by slug */}
+            {/* Must be :slug — ProductPage reads useParams().slug, ProductCard
+                links to /products/<slug>, and the backend looks products up by slug */}
             <Route
               path="/products/:slug"
               element={
