@@ -164,20 +164,34 @@ export function extractApiError(err: unknown): {
     if (data?.error) {
       return {
         code: data.error.code,
-        message: data.error.message,
+        // Validation errors carry a generic message; the useful text is in
+        // details: { field: ["msg", ...] }. Surface the first field message.
+        message: firstFieldError(data.error.details) ?? data.error.message,
         status: err.response?.status,
       };
     }
+    // No response at all → backend down / CORS / offline
+    if (!err.response) {
+      return { code: 'NETWORK_ERROR', message: "Can't reach the server. Please try again." };
+    }
     return {
-      code: err.code ?? 'NETWORK_ERROR',
+      code: err.code ?? 'HTTP_ERROR',
       message: err.message,
-      status: err.response?.status,
+      status: err.response.status,
     };
   }
   if (err instanceof Error) {
     return { code: 'UNKNOWN', message: err.message };
   }
   return { code: 'UNKNOWN', message: 'An unknown error occurred' };
+}
+
+function firstFieldError(details: unknown): string | undefined {
+  if (!details || typeof details !== 'object') return undefined;
+  for (const messages of Object.values(details)) {
+    if (Array.isArray(messages) && typeof messages[0] === 'string') return messages[0];
+  }
+  return undefined;
 }
 
 // ============================================================
