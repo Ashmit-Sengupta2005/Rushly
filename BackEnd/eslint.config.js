@@ -16,6 +16,9 @@ export default defineConfig([
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: globals.node,
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     rules: {
       // `_`-prefixed = intentionally unused (e.g. Express error handlers must

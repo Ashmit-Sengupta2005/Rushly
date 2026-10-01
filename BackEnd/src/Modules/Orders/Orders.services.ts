@@ -27,12 +27,23 @@ export const ordersService = {
       include: {
         items: true,
         statusHistory: { orderBy: { changedAt: 'asc' } },
+        // Partial refunds keep the order PAID, so without this list the customer
+        // can't tell a partially refunded order from a normal one. Stripe ids are
+        // internal — expose only what the order page shows.
+        refunds: {
+          select: { id: true, amount: true, reason: true, status: true, createdAt: true },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 
     if (!order || order.userId !== userId) {
       throw errors.notFound('ORDER_NOT_FOUND');
     }
-    return order;
+    // Only money that actually went back counts (not PENDING/FAILED refunds)
+    const refundedAmount = order.refunds
+      .filter((r) => r.status === 'SUCCEEDED')
+      .reduce((sum, r) => sum + r.amount, 0);
+    return { ...order, refundedAmount };
   },
 };
