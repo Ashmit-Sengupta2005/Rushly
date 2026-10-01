@@ -5,7 +5,7 @@
 # Debian-slim (glibc), not Alpine (musl): argon2 is a native module and on musl
 # node-gyp must download special "unofficial" musl headers over the network,
 # which is unreliable in sandboxed/CI build environments. glibc avoids that.
-FROM node:20-slim AS build
+FROM node:24-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl python3 make g++ \
@@ -30,7 +30,7 @@ RUN corepack enable && pnpm install --frozen-lockfile
 COPY BackEnd ./BackEnd
 RUN pnpm --filter backend run build
 
-FROM node:20-slim
+FROM node:24-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
