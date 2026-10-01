@@ -1,0 +1,200 @@
+import axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios';
+import { env } from '@/config/env';
+import { tokenStorage } from './tokenStorage';
+import type { ApiErrorPayload, RefreshResponse } from '@/types/api';
+
+// ============================================================
+// Base axios instance
+// ============================================================
+// withCredentials: true — refresh token lives in httpOnly cookie, backend
+// requires credentials for CORS. Without this the cookie is NOT sent and
+// /auth/refresh will 401 every time.
+export const api = axios.create({
+  baseURL: env.API_BASE, // ${VITE_API_URL}/api
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// ============================================================
+// Request interceptor — attach access token
+// ============================================================
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = tokenStorage.get();
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return config;
+});
+
+// ============================================================
+// Response interceptor — single-flight 401 refresh
+// ============================================================
+// Why single-flight:
+//   The backend's /auth/refresh is rate-limited to 5 req/min per IP.
+//   If 10 queries fire at once and the token is expired, naive handling
+//   would call /refresh 10 times → 5 succeed, 5 get rate-limited.
+//   Instead, the FIRST 401 triggers one refresh; all other 401s during
+//   that window wait on the same promise and reuse the resulting token.
+//
+// Why we NEVER retry /auth/refresh itself:
+//   If refresh fails, infinite loop risk is real. We must clear tokens
+//   and let the UI redirect to login.
+//
+// How a config knows it has already been retried:
+//   We tag it with `_retry = true` on the first retry. Second time around,
+//   we don't try again — just propagate the error.
+
+interface RetryableRequest extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+// The in-progress refresh promise. If null, no refresh is happening.
+// If non-null, every incoming 401 awaits this instead of starting its own.
+let refreshPromise: Promise<string> | null = null;
+
+/**
+ * Perform the actual refresh. One at a time, process-wide.
+ * On success, writes the new token to the store and returns it.
+ * On failure, clears tokens and rejects.
+ */
+async function doRefresh(): Promise<string> {
+  try {
+    // Use raw axios (not `api`) to bypass interceptors — we don't want
+    // to recurse into this same interceptor on the refresh request itself.
+    const response = await axios.post<RefreshResponse>(
+      `${env.API_BASE}/auth/refresh`,
+      {},
+      { withCredentials: true },
+    );
+    const newToken = response.data.accessToken; // ← refresh uses `accessToken` key
+    tokenStorage.set(newToken);
+    return newToken;
+  } catch (err) {
+    // Refresh failed → user is effectively logged out. Clear the store so
+    // UI reacts (route guards redirect to /login).
+    tokenStorage.clear();
+    throw err;
+  }
+}
+
+/**
+ * Public helper: get a refresh promise, creating one if none exists.
+ * All concurrent callers share the same promise — exactly one network call.
+ */
+export function refreshAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = doRefresh().finally(() => {
+      // Clear the slot once settled so the NEXT 401 can start a new refresh.
+      // finally() runs for both success and failure.
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+api.interceptors.response.use(
+  // Normalize login/register responses: they return `tokens` instead of `accessToken`.
+  // Rewrite them in-place so the rest of the code only ever sees `accessToken`.
+  (response: AxiosResponse) => {
+    const url = response.config.url ?? '';
+    const isLoginOrRegister =
+      url.endsWith('/auth/login') || url.endsWith('/auth/register');
+    if (isLoginOrRegister && response.data && typeof response.data === 'object') {
+      const data = response.data as { tokens?: string; accessToken?: string };
+      if (data.tokens && !data.accessToken) {
+        data.accessToken = data.tokens;
+        delete data.tokens;
+      }
+    }
+    return response;
+  },
+  async (error: AxiosError<ApiErrorPayload>) => {
+    const originalRequest = error.config as RetryableRequest | undefined;
+    const status = error.response?.status;
+    const url = originalRequest?.url ?? '';
+
+    // Non-401 or no config → propagate as-is.
+    if (status !== 401 || !originalRequest) {
+      return Promise.reject(error);
+    }
+
+    // Never try to refresh if the failing request IS /auth/refresh itself —
+    // that would recurse. Also skip /auth/login (wrong password shouldn't
+    // trigger refresh).
+    if (url.endsWith('/auth/refresh') || url.endsWith('/auth/login')) {
+      return Promise.reject(error);
+    }
+
+    // Already retried once → give up, let caller handle it.
+    if (originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      // Join (or start) the single in-flight refresh.
+      const newToken = await refreshAccessToken();
+      // Replay the original request with the new token.
+      originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
+      return api.request(originalRequest);
+    } catch (refreshError) {
+      // Refresh failed → the retry fails too. UI will see the original 401
+      // (or whatever refresh threw) and redirect to login.
+      return Promise.reject(refreshError);
+    }
+  },
+);
+
+// ============================================================
+// Error extraction helper — use when displaying errors to users
+// ============================================================
+export function extractApiError(err: unknown): {
+  code: string;
+  message: string;
+  status?: number;
+} {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as ApiErrorPayload | undefined;
+    if (data?.error) {
+      return {
+        code: data.error.code,
+        message: data.error.message,
+        status: err.response?.status,
+      };
+    }
+    return {
+      code: err.code ?? 'NETWORK_ERROR',
+      message: err.message,
+      status: err.response?.status,
+    };
+  }
+  if (err instanceof Error) {
+    return { code: 'UNKNOWN', message: err.message };
+  }
+  return { code: 'UNKNOWN', message: 'An unknown error occurred' };
+}
+
+// ============================================================
+// Convenience wrapper for typed GET/POST/etc.
+// Not strictly necessary — components can use `api` directly —
+// but these give you one import and no AxiosResponse unwrapping.
+// ============================================================
+export const apiClient = {
+  get: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.get<T>(url, config).then((r) => r.data),
+
+  post: <T>(url: string, body?: unknown, config?: AxiosRequestConfig) =>
+    api.post<T>(url, body, config).then((r) => r.data),
+
+  patch: <T>(url: string, body?: unknown, config?: AxiosRequestConfig) =>
+    api.patch<T>(url, body, config).then((r) => r.data),
+
+  delete: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.delete<T>(url, config).then((r) => r.data),
+};
