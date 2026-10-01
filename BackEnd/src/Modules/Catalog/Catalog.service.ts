@@ -1,13 +1,32 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from "../../config/prisma.js";
-import { syncProductStock } from '../CheckOut/Inventory.redis.js';
+import { syncProductStock, getRedisStocks } from '../CheckOut/Inventory.redis.js';
 import { errors } from '../../utils/Errors.js';
 import { logger } from '../../utils/logger.js';
 import type { ListProductsQuery,CreateProductInput,UpdateProductInput,AdjustInventoryInput } from './Catalog.schemas.js';
 import { cacheService, cacheKeys} from '../../utils/cache.service.js';
 import crypto from 'node:crypto';
 
-// include is used for strictly reading results on the basis of joins 
+// include is used for strictly reading results on the basis of joins
+
+type WithInventory = { id: string; inventory?: { availableStock: number } | null };
+
+/**
+ * Product metadata (name, images, price) is cached for minutes, but stock must
+ * be live during a flash sale — otherwise a sold-out product keeps showing
+ * "24 in stock" until the cache expires. So the cache stores metadata and we
+ * overlay the live Redis stock on every read (one MGET, sub-millisecond).
+ * Returns new objects — never mutates what's in the cache.
+ */
+async function withLiveStock<T extends WithInventory>(products: T[]): Promise<T[]> {
+  const live = await getRedisStocks(products.map((p) => p.id));
+  return products.map((p) => {
+    const stock = live.get(p.id);
+    return stock === undefined || !p.inventory
+      ? p
+      : { ...p, inventory: { ...p.inventory, availableStock: Math.max(0, stock) } };
+  });
+}
 
 export const catalogService={
     async listProducts(query:ListProductsQuery){
@@ -23,13 +42,13 @@ export const catalogService={
     
     // Try cache first
   const cached = await cacheService.get<{
-    items: unknown[];
+    items: WithInventory[];
     nextCursor: string | null;
     hasMore: boolean;
   }>(cacheKey);
 
   if (cached) {
-    return cached;
+    return { ...cached, items: await withLiveStock(cached.items) };
   }
    // Cache miss — hit Postgres (existing code, unchanged)
     // Cursor pagination pattern: fetch limit+1, use the extra to detect
@@ -59,14 +78,14 @@ export const catalogService={
     const items = hasMore ? products.slice(0, query.limit) : products;
     const nextCursor = hasMore ? items[items.length - 1].id : null;
     const result={ items, nextCursor, hasMore };
-    // Populate cache for next request. Short TTL so stock data doesn't get too stale.
-    await cacheService.set(cacheKey, result, 60); // 1 min for lists (stock changes)
-    return result;
+    // Populate cache for next request (stock in it is overwritten live on read).
+    await cacheService.set(cacheKey, result, 60); // 1 min for lists
+    return { ...result, items: await withLiveStock(result.items) };
 },
     async getProductBySlug(slug:string){
         const cacheKey = cacheKeys.productBySlug(slug);
-        const cached = await cacheService.get<unknown>(cacheKey);
-        if (cached) return cached;
+        const cached = await cacheService.get<WithInventory>(cacheKey);
+        if (cached) return (await withLiveStock([cached]))[0];
         const product = await prisma.product.findUnique({
         where: { slug },
         include: {
@@ -77,9 +96,9 @@ export const catalogService={
     });
     if (!product || !product.isActive) {
       throw errors.notFound('PRODUCT_NOT_FOUND', 'Product does not exist');}
-    // Cache for 5 min — product metadata rarely changes; inventory is fetched fresh via cache miss
+    // Cache for 5 min — metadata rarely changes; stock is overlaid live from Redis on every read
     await cacheService.set(cacheKey, product, 300);
-    return product;
+    return (await withLiveStock([product]))[0];
     },
     async createProduct(input:CreateProductInput){
     // Transactional via nested writes: product + images + inventory created

@@ -53,12 +53,34 @@ export const stripeWebhookService = {
       return;
     }
     if (reservation.status !== 'PENDING') {
+      // The payment landed after the hold ended — EXPIRED (paid at the last
+      // second / slow 3-D Secure) or CANCELLED (user cancelled in another tab).
+      // The held stock was already released, so there is nothing to fulfil and
+      // no order is created. Refund in full rather than keep the money.
       logger.warn(
-        { reservationId, status: reservation.status },
-        'Payment succeeded but reservation is not PENDING',
+        { reservationId, status: reservation.status, intentId: intent.id },
+        'Payment succeeded but reservation is not PENDING — auto-refunding',
       );
-      // Weird state — maybe expired between payment and webhook. Log; don't create order.
-      // In production, this would trigger an automatic refund.
+      try {
+        const refund = await stripe.refunds.create(
+          {
+            payment_intent: intent.id,
+            metadata: { reservationId, reason: `reservation_${reservation.status.toLowerCase()}` },
+          },
+          // Keyed on the intent: a duplicate event for the same payment can
+          // never produce a second refund.
+          { idempotencyKey: `late-payment-refund:${intent.id}` },
+        );
+        logger.info({ reservationId, intentId: intent.id, refundId: refund.id }, 'Late payment refunded');
+      } catch (err) {
+        // The controller marks this event 'failed' and returns 200 (no Stripe
+        // retry), so this log is the only signal — make it impossible to miss.
+        logger.error(
+          { err, reservationId, intentId: intent.id, amount: intent.amount },
+          'AUTO-REFUND FAILED for late payment — refund manually in the Stripe dashboard',
+        );
+        throw err;
+      }
       return;
     }
     // ========================================================

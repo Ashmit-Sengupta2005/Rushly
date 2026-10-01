@@ -220,6 +220,22 @@ export async function getRedisStock(productId: string): Promise<number | null> {
   return val === null ? null : parseInt(val, 10);
 }
 
+/**
+ * Live stock for many products in ONE round trip (MGET). Redis is the source of
+ * truth for "available right now" — it already subtracts active checkout holds,
+ * which Postgres availableStock only reflects after payment. Products with no
+ * Redis key are omitted (callers fall back to the Postgres value).
+ */
+export async function getRedisStocks(productIds: string[]): Promise<Map<string, number>> {
+  const live = new Map<string, number>();
+  if (productIds.length === 0) return live;
+  const vals = await redis.mget(...productIds.map(stockKey));
+  vals.forEach((val, i) => {
+    if (val !== null) live.set(productIds[i], parseInt(val, 10));
+  });
+  return live;
+}
+
 // ============================================================
 // KEY BUILDERS — one place to change if we ever restructure keys
 // ============================================================
