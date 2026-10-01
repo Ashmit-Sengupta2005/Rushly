@@ -28,17 +28,18 @@ export interface User {
 }
 
 /**
- * NOTE: login/register return token under key `tokens` (string).
- * refresh returns token under key `accessToken` (string).
- * apiClient normalizes both into `accessToken` before anything else sees them.
+ * NOTE: on the wire, login/register return the token under key `tokens` (string)
+ * while refresh returns it under `accessToken`.
+ * apiClient's response interceptor renames `tokens` → `accessToken`, so these
+ * types describe what callers of `api`/`apiClient` actually receive.
  */
 export interface LoginResponse {
   user: User;
-  tokens: string; // ← yes, singular access token under plural key
+  accessToken: string; // normalized from the backend's `tokens` key
 }
 export interface RegisterResponse {
   user: User;
-  tokens: string;
+  accessToken: string; // normalized from the backend's `tokens` key
 }
 export interface RefreshResponse {
   user: User;
@@ -246,8 +247,8 @@ export interface OrderListItem {
   status: OrderStatus;
   totalAmount: number;
   currency: 'INR';
-  reservationId: string;
-  stripePaymentIntentId: string;
+  reservationId: string | null;         // nullable in the Prisma schema
+  stripePaymentIntentId: string | null; // nullable in the Prisma schema
   createdAt: string;
   items: OrderItem[];
 }
