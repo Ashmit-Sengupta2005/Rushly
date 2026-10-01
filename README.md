@@ -88,10 +88,15 @@ k6 run \
 ## Tech Stack
 
 **Backend:** Node.js 20, TypeScript, Express, Prisma ORM v7, BullMQ
+
 **Data:** PostgreSQL 16 (Neon), Redis 7 (Upstash)
+
 **Payments:** Stripe (test mode, INR)
+
 **Email:** Brevo (transactional)
+
 **Testing:** k6 for load testing, Postman for integration
+
 **Deployment:** Render (backend), Docker multi-stage build
 
 ---
