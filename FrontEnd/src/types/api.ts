@@ -205,7 +205,12 @@ export interface ReservationItemLite {
   priceSnapshot: number;
 }
 
+/**
+ * Reservation items have NO name/image snapshots (only Orders do) — read the
+ * name/image from the joined `product`.
+ */
 export interface ReservationItemDetail extends ReservationItemLite {
+  id: string;
   product: {
     id: string;
     slug: string;

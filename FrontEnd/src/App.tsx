@@ -9,6 +9,9 @@ import RegisterPage from '@/pages/RegisterPage';
 import CatalogPage from '@/pages/CatalogPage';
 import ProductPage from '@/pages/ProductPage';
 import CartPage from '@/pages/CartPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import PaymentPage from '@/pages/PaymentPage';
+import CheckoutCompletePage from '@/pages/CheckoutCompletePage';
 
 export default function App() {
   return (
@@ -41,6 +44,32 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <CartPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* Checkout: address → reserve → pay (Stripe) → wait for webhook → order */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkout/payment/:reservationId"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* Also Stripe's 3-D Secure return_url — must stay in sync with StripePaymentForm */}
+            <Route
+              path="/checkout/complete/:reservationId"
+              element={
+                <ProtectedRoute>
+                  <CheckoutCompletePage />
                 </ProtectedRoute>
               }
             />
