@@ -324,8 +324,25 @@ export interface OrderListItem {
   items: OrderItem[];
 }
 
+export type RefundStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
+
+export interface OrderRefund {
+  id: string;
+  amount: number;          // paise
+  reason: string | null;
+  status: RefundStatus;
+  createdAt: string;
+}
+
+/** GET /orders/:id only — the list endpoint has no history/refunds. */
 export interface OrderDetail extends OrderListItem {
   statusHistory: OrderStatusHistoryEntry[];
+  refunds: OrderRefund[];
+  /**
+   * Sum of SUCCEEDED refunds (paise), computed by the backend. A partial refund
+   * leaves status PAID — show "₹X refunded" when refundedAmount > 0.
+   */
+  refundedAmount: number;
 }
 
 export interface OrdersListResponse {
