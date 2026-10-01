@@ -40,8 +40,11 @@ export const cartService={
           where: { id: input.productId },
           include: { inventory: true },});
         if (!product || !product.isActive) {
-        throw errors.notFound('PRODUCT_NOT_FOUND');}
-        if (!product.inventory || product.inventory.availableStock < input.quantity) {
+        throw errors.notFound('PRODUCT_NOT_FOUND', 'Product not found');}
+        // The upsert below ADDS to an existing line, so check the resulting total,
+        // not just the amount being added.
+        const alreadyInCart = cart.items.find((i) => i.productId === input.productId)?.quantity ?? 0;
+        if (!product.inventory || product.inventory.availableStock < alreadyInCart + input.quantity) {
         throw errors.conflict('INSUFFICIENT_STOCK', 'Not enough stock available', {
         available: product.inventory?.availableStock ?? 0,
       });}
@@ -70,6 +73,7 @@ export const cartService={
                     },
                 },
         },});
+        return item;
     },
     async updateItemQuantity(userId: string, productId: string, input: updateItemInput) {
         const cart = await prisma.cart.findUnique({ where: { userId } });
@@ -78,7 +82,9 @@ export const cartService={
                         where: { id: productId },
                         include: { inventory: true }, });
         if (!product?.inventory || product.inventory.availableStock < input.quantity) {
-            throw errors.conflict('INSUFFICIENT_STOCK');}
+            throw errors.conflict('INSUFFICIENT_STOCK', 'Not enough stock available', {
+              available: product?.inventory?.availableStock ?? 0,
+            });}
         const item = await prisma.cartItem.update({
       where: { cartId_productId: { cartId: cart.id, productId } },
       data: { quantity: input.quantity },
