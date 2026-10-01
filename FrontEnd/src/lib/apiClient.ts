@@ -55,14 +55,15 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
 
 // The in-progress refresh promise. If null, no refresh is happening.
 // If non-null, every incoming 401 awaits this instead of starting its own.
-let refreshPromise: Promise<string> | null = null;
+let refreshPromise: Promise<RefreshResponse> | null = null;
 
 /**
  * Perform the actual refresh. One at a time, process-wide.
- * On success, writes the new token to the store and returns it.
+ * On success, writes the new token to the store and returns the full
+ * response ({ user, accessToken }) so the auth bootstrap can reuse it.
  * On failure, clears tokens and rejects.
  */
-async function doRefresh(): Promise<string> {
+async function doRefresh(): Promise<RefreshResponse> {
   try {
     // Use raw axios (not `api`) to bypass interceptors — we don't want
     // to recurse into this same interceptor on the refresh request itself.
@@ -71,9 +72,8 @@ async function doRefresh(): Promise<string> {
       {},
       { withCredentials: true },
     );
-    const newToken = response.data.accessToken; // ← refresh uses `accessToken` key
-    tokenStorage.set(newToken);
-    return newToken;
+    tokenStorage.set(response.data.accessToken); // ← refresh uses `accessToken` key
+    return response.data;
   } catch (err) {
     // Refresh failed → user is effectively logged out. Clear the store so
     // UI reacts (route guards redirect to /login).
@@ -86,7 +86,7 @@ async function doRefresh(): Promise<string> {
  * Public helper: get a refresh promise, creating one if none exists.
  * All concurrent callers share the same promise — exactly one network call.
  */
-export function refreshAccessToken(): Promise<string> {
+export function refreshAccessToken(): Promise<RefreshResponse> {
   if (!refreshPromise) {
     refreshPromise = doRefresh().finally(() => {
       // Clear the slot once settled so the NEXT 401 can start a new refresh.
@@ -139,7 +139,7 @@ api.interceptors.response.use(
 
     try {
       // Join (or start) the single in-flight refresh.
-      const newToken = await refreshAccessToken();
+      const { accessToken: newToken } = await refreshAccessToken();
       // Replay the original request with the new token.
       originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
       return api.request(originalRequest);
