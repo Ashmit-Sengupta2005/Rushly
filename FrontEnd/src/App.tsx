@@ -6,18 +6,8 @@ import { AuthProvider } from '@/features/auth/AuthProvider';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
-
-// Placeholder — replaced in Phase 3 by the real catalog page
-function HomePage() {
-  return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold">Rushly</h1>
-      <p className="text-muted-foreground mt-2">
-        Signed in. Catalog arrives in Phase 3.
-      </p>
-    </div>
-  );
-}
+import CatalogPage from '@/pages/catalogPage';
+import ProductPage from '@/pages/productPage';
 
 export default function App() {
   return (
@@ -31,7 +21,16 @@ export default function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <HomePage />
+                  <CatalogPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* ProductCard links here by slug — backend looks products up by slug */}
+            <Route
+              path="/products/:slug"
+              element={
+                <ProtectedRoute>
+                  <ProductPage />
                 </ProtectedRoute>
               }
             />

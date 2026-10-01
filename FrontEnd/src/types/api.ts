@@ -75,6 +75,17 @@ export interface ProductCategory {
   name: string;
 }
 
+/** GET /categories — filter products with ?categorySlug=<slug> */
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface CategoriesResponse {
+  categories: Category[];
+}
+
 export interface ProductInventory {
   availableStock: number;
   totalStock?: number;
@@ -162,6 +173,27 @@ export interface UpdateCartItemInput {
   quantity: number;
 }
 
+/**
+ * POST /cart/items and PATCH /cart/items/:productId return just the touched
+ * row as `{ item }` — NOT the whole cart, and without the computed fields
+ * (lineTotal, outOfStock, …). Refetch the cart query for those.
+ */
+export interface CartItemMutationResponse {
+  item: {
+    id: string;
+    productId: string;
+    quantity: number;
+    priceSnapshot: number;
+    product: {
+      id: string;
+      slug: string;
+      name: string;
+      price: number;
+      images: ProductImage[];
+    };
+  };
+}
+
 // ============================================================
 // Checkout
 // ============================================================
@@ -182,6 +214,23 @@ export interface ReservationItemDetail extends ReservationItemLite {
   };
 }
 
+/** Snapshot sent with POST /checkout/reserve and copied onto the Order. */
+export interface ShippingAddressInput {
+  fullName: string;
+  phone: string;       // 10–15 digits, optional leading +
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country?: string;    // backend defaults to "India"
+}
+
+/** Body of POST /checkout/reserve — items come from the server-side cart. */
+export interface CreateReservationInput {
+  shippingAddress: ShippingAddressInput;
+}
+
 export interface CreateReservationResponse {
   reservation: {
     reservationId: string;
@@ -198,6 +247,9 @@ export interface GetReservationResponse {
     expiresAt: string;
     items: ReservationItemDetail[];
     totalAmount: number;
+    shippingAddress: ShippingAddressInput | null;
+    /** Set by the payment webhook — null until status is PAID. */
+    order: { id: string; status: OrderStatus } | null;
   };
 }
 
