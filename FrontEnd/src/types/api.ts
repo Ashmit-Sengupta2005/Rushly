@@ -99,8 +99,8 @@ export interface ProductListItem {
   price: number; // paise
   isActive: boolean;
   images: ProductImage[];
-  category?: ProductCategory;
-  inventory?: ProductInventory;
+  category?: ProductCategory | null; // null when the product has no category
+  inventory?: ProductInventory | null;
 }
 
 /** Shape of a product in the detail endpoint (full). */

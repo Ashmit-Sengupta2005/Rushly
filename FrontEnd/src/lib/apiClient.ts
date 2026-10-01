@@ -166,7 +166,11 @@ export function extractApiError(err: unknown): {
         code: data.error.code,
         // Validation errors carry a generic message; the useful text is in
         // details: { field: ["msg", ...] }. Surface the first field message.
-        message: firstFieldError(data.error.details) ?? data.error.message,
+        // `||` not `??`: also guards against an empty-string message
+        message:
+          firstFieldError(data.error.details) ||
+          data.error.message ||
+          'Something went wrong. Please try again.',
         status: err.response?.status,
       };
     }
