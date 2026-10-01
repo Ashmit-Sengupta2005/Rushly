@@ -23,12 +23,10 @@ export function useLogout() {
     onSettled: () => {
       tokenStorage.clear();
       useAuth.getState().clear();
-      // Navigate first so private pages (cart, orders) unmount, then drop their
-      // cache. Clearing first could make still-mounted queries refetch without a
-      // token → 401 → a wasted /auth/refresh call against the 5/min limit.
-      navigate('/login', { replace: true });
-      queryClient.clear();
+      queryClient.clear(); // nuke any cached private data
       toast.success('Logged out');
+      // replace: Back button shouldn't return to a private page after logout
+      navigate('/login', { replace: true });
     },
   });
 }

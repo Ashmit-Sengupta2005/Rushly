@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { queryClient } from '@/config/queryClient';
 import { AuthProvider } from '@/features/auth/AuthProvider';
-import { ProtectedRoute } from '@/components/Layout/ProtectedRoute';
+import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 
