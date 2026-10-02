@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router';
+import { AuthLayout } from '@/components/layout/AuthLayout';
 import { LoginForm } from '@/features/auth/LoginForm';
 import { GoogleSignInButton } from '@/features/auth/GoogleSignInButton';
 import { useAuth, useIsAuthenticated } from '@/features/auth/useAuth';
@@ -12,17 +13,9 @@ export default function LoginPage() {
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to your Rushly account
-          </p>
-        </div>
-        <LoginForm />
-        <GoogleSignInButton />
-      </div>
-    </div>
+    <AuthLayout title="Welcome back" subtitle="Sign in to catch the next drop.">
+      <LoginForm />
+      <GoogleSignInButton />
+    </AuthLayout>
   );
 }

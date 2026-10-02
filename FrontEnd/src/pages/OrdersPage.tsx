@@ -26,15 +26,15 @@ export default function OrdersPage() {
   const orders = data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">My orders</h1>
+      <main className="max-w-3xl mx-auto px-4 py-8 pb-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tighter mb-8">Your orders</h1>
 
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-28 bg-muted animate-pulse rounded-lg" />
+              <div key={i} className="h-32 bg-muted animate-pulse rounded-2xl" />
             ))}
           </div>
         )}
@@ -44,10 +44,13 @@ export default function OrdersPage() {
         )}
 
         {!isLoading && !isError && orders.length === 0 && (
-          <div className="text-center py-16 space-y-4">
-            <p className="text-muted-foreground">You haven't placed any orders yet.</p>
-            <Link to="/" className={buttonVariants()}>
-              Browse products
+          <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border py-20 text-center animate-fade-up">
+            <div className="space-y-1">
+              <p className="text-lg font-semibold">No orders yet</p>
+              <p className="text-sm text-muted-foreground">When you grab something from a drop, it shows up here.</p>
+            </div>
+            <Link to="/" className={buttonVariants({ variant: 'brand', size: 'lg' })}>
+              Browse drops
             </Link>
           </div>
         )}

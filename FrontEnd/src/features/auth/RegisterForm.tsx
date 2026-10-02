@@ -81,13 +81,13 @@ export function RegisterForm() {
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={registerUser.isPending}>
+      <Button type="submit" size="lg" className="w-full" disabled={registerUser.isPending}>
         {registerUser.isPending ? 'Creating account…' : 'Create account'}
       </Button>
 
       <p className="text-sm text-muted-foreground text-center">
         Already have an account?{' '}
-        <Link to="/login" className="underline underline-offset-4 hover:text-foreground">
+        <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
           Sign in
         </Link>
       </p>

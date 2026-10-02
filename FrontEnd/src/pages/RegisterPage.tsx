@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router';
+import { AuthLayout } from '@/components/layout/AuthLayout';
 import { RegisterForm } from '@/features/auth/RegisterForm';
 import { GoogleSignInButton } from '@/features/auth/GoogleSignInButton';
 import { useAuth, useIsAuthenticated } from '@/features/auth/useAuth';
@@ -11,17 +12,9 @@ export default function RegisterPage() {
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-          <p className="text-sm text-muted-foreground">
-            Start shopping on Rushly in seconds
-          </p>
-        </div>
-        <RegisterForm />
-        <GoogleSignInButton text="signup_with" />
-      </div>
-    </div>
+    <AuthLayout title="Create an account" subtitle="Start shopping on Rushly in seconds.">
+      <RegisterForm />
+      <GoogleSignInButton text="signup_with" />
+    </AuthLayout>
   );
 }

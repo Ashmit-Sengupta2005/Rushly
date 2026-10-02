@@ -27,7 +27,7 @@ export default function OrderDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
           <div className="h-24 bg-muted animate-pulse rounded-lg" />
@@ -40,7 +40,7 @@ export default function OrderDetailPage() {
   // useOrder doesn't retry 404s, so "not yours / doesn't exist" lands here quickly
   if (isError || !order) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <div className="max-w-md mx-auto p-8 text-center space-y-4">
           <h1 className="text-xl font-semibold">Order not found</h1>
@@ -61,7 +61,7 @@ export default function OrderDetailPage() {
   const partiallyRefunded = order.refundedAmount > 0 && order.status !== 'REFUNDED';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <Link

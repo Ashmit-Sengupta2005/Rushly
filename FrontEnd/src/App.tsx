@@ -96,7 +96,7 @@ export default function App() {
             {/* Keep LAST — any unknown URL shows a 404 instead of a blank page */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="bottom-right" />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router';
+import { ArrowRight, Lock } from 'lucide-react';
 import type { Cart } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/formatMoney';
@@ -16,8 +17,8 @@ export function CartSummary({ cart }: { cart: Cart }) {
   const canCheckout = cart.items.length > 0 && !cart.hasOutOfStock;
 
   return (
-    <div className="border border-border rounded-lg p-4 space-y-4 sticky top-20 h-fit">
-      <h2 className="font-semibold">Order summary</h2>
+    <div className="rounded-2xl border border-border bg-card p-6 space-y-5 shadow-xs lg:sticky lg:top-24 h-fit">
+      <h2 className="text-lg font-bold">Order summary</h2>
 
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
@@ -30,7 +31,7 @@ export function CartSummary({ cart }: { cart: Cart }) {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border flex justify-between font-semibold">
+      <div className="pt-4 border-t border-dashed border-border flex justify-between items-baseline font-bold text-lg">
         <span>Total</span>
         <span>{formatMoney(subtotal)}</span>
       </div>
@@ -47,13 +48,19 @@ export function CartSummary({ cart }: { cart: Cart }) {
       )}
 
       <Button
-        className="w-full"
+        className="w-full h-12 text-base"
         size="lg"
+        variant="brand"
         disabled={!canCheckout}
         onClick={() => navigate('/checkout')}
       >
         Checkout
+        <ArrowRight className="size-5" />
       </Button>
+      <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+        <Lock className="size-3" />
+        Secure checkout powered by Stripe
+      </p>
     </div>
   );
 }

@@ -1,10 +1,28 @@
 import { Link, NavLink } from 'react-router';
-import { ShoppingCart, Package, LogOut } from 'lucide-react';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { ShoppingBag, Package, LogOut, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/features/auth/useAuth';
 import { useLogout } from '@/features/auth/useLogout';
 import { useCart } from '@/features/cart/useCart';
+import { Logo } from './Logo';
+
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+    isActive
+      ? 'bg-foreground text-background'
+      : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+  );
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join('');
+}
 
 // Shared header for the browsing pages. Checkout/payment pages keep their own
 // minimal header (the payment page has the countdown + cancel button).
@@ -16,49 +34,55 @@ export function Navbar() {
   const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   return (
-    <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-10">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <Link to="/" className="text-xl font-bold tracking-tight">
-          Rushly
-        </Link>
+    <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <Logo />
 
-        <nav aria-label="Main" className="flex items-center gap-2">
-          <NavLink
-            to="/orders"
-            className={({ isActive }) =>
-              cn(buttonVariants({ variant: 'ghost', size: 'sm' }), isActive && 'bg-muted')
-            }
-          >
-            <Package className="h-4 w-4" />
-            <span className="hidden sm:inline">My orders</span>
+        <nav aria-label="Main" className="flex items-center gap-1 sm:gap-2">
+          <NavLink to="/" end className={navLinkClass}>
+            <Sparkles className="size-4" />
+            <span className="hidden sm:inline">Drops</span>
+          </NavLink>
+          <NavLink to="/orders" className={navLinkClass}>
+            <Package className="size-4" />
+            <span className="hidden sm:inline">Orders</span>
           </NavLink>
 
           <Link
             to="/cart"
-            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            className="relative inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-xs transition hover:-translate-y-px hover:shadow-md"
             aria-label={`Cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
           >
-            <ShoppingCart className="h-4 w-4" />
-            <span className="hidden sm:inline">Cart</span>
+            <ShoppingBag className="size-4" />
             {itemCount > 0 && (
-              <span className="rounded-full bg-primary text-primary-foreground text-xs px-2 py-0.5 font-medium">
-                {itemCount}
+              <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 grid place-items-center rounded-full bg-brand-gradient text-[0.7rem] font-bold text-white shadow-sm ring-2 ring-background">
+                {itemCount > 99 ? '99+' : itemCount}
               </span>
             )}
           </Link>
 
           {user && (
-            <span className="text-sm text-muted-foreground hidden md:inline px-2">{user.name}</span>
+            <div className="hidden md:flex items-center gap-2 pl-2 ml-1 border-l border-border">
+              <span
+                aria-hidden
+                className="grid size-8 place-items-center rounded-full bg-foreground text-background text-xs font-semibold"
+              >
+                {initials(user.name)}
+              </span>
+              <span className="text-sm font-medium max-w-32 truncate">{user.name}</span>
+            </div>
           )}
 
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            className="rounded-full text-muted-foreground"
             onClick={() => logout.mutate()}
             disabled={logout.isPending}
             aria-label="Log out"
+            title="Log out"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="size-4" />
           </Button>
         </nav>
       </div>

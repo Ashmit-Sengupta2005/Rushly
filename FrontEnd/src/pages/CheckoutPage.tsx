@@ -55,8 +55,8 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <Link
             to="/cart"

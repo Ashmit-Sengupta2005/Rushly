@@ -13,18 +13,18 @@ export function OrderCard({ order }: { order: OrderListItem }) {
   return (
     <Link
       to={`/orders/${order.id}`}
-      className="block rounded-lg border border-border p-4 hover:border-foreground/40 transition-colors"
+      className="block rounded-2xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-foreground/5 hover:border-foreground/15"
     >
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium">Order #{shortOrderId(order.id)}</p>
+          <p className="text-sm font-semibold font-mono tracking-tight">#{shortOrderId(order.id)}</p>
           <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
         </div>
         <OrderStatusBadge status={order.status} />
       </div>
 
       <div className="flex gap-3 items-center">
-        <div className="h-14 w-14 bg-muted rounded-md overflow-hidden flex-shrink-0">
+        <div className="size-16 bg-muted rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-border">
           {/* Snapshots only — what was bought, even if the product changed since */}
           {firstItem?.productImageSnapshot && (
             <img
@@ -42,7 +42,7 @@ export function OrderCard({ order }: { order: OrderListItem }) {
             {otherLines > 0 && ` · +${otherLines} more ${otherLines === 1 ? 'product' : 'products'}`}
           </p>
         </div>
-        <p className="font-semibold text-sm">{formatMoney(order.totalAmount)}</p>
+        <p className="font-bold">{formatMoney(order.totalAmount)}</p>
       </div>
     </Link>
   );

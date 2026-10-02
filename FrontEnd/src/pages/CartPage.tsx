@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/features/cart/useCart';
 import { CartItemRow } from '@/features/cart/CartItemRow';
 import { CartSummary } from '@/features/cart/CartSummary';
@@ -8,48 +8,62 @@ import { Navbar } from '@/components/layout/Navbar';
 
 export default function CartPage() {
   const { data: cart, isLoading, isError } = useCart();
+  const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 pb-16">
         {/* Page-level back link (not navigation) stays with the page */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           Continue shopping
         </Link>
-        <h1 className="text-2xl font-bold mb-6">Your cart</h1>
+        <div className="flex items-baseline gap-3 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tighter">Your bag</h1>
+          {itemCount > 0 && (
+            <span className="text-muted-foreground">
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            </span>
+          )}
+        </div>
 
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-24 bg-muted animate-pulse rounded-md" />
+              <div key={i} className="h-28 bg-muted animate-pulse rounded-2xl" />
             ))}
           </div>
         )}
 
         {isError && (
-          <p className="text-destructive py-8 text-center">
+          <div className="rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 py-12 text-center text-destructive">
             Could not load your cart. Try refreshing.
-          </p>
+          </div>
         )}
 
         {cart && cart.items.length === 0 && (
-          <div className="text-center py-16 space-y-4">
-            <p className="text-muted-foreground">Your cart is empty.</p>
-            <Link to="/" className={buttonVariants()}>
-              Browse products
+          <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border py-20 text-center animate-fade-up">
+            <span className="grid size-14 place-items-center rounded-2xl bg-muted">
+              <ShoppingBag className="size-6 text-muted-foreground" />
+            </span>
+            <div className="space-y-1">
+              <p className="text-lg font-semibold">Your bag is empty</p>
+              <p className="text-sm text-muted-foreground">The good stuff goes fast — go grab something.</p>
+            </div>
+            <Link to="/" className={buttonVariants({ variant: 'brand', size: 'lg' })}>
+              Browse drops
             </Link>
           </div>
         )}
 
         {cart && cart.items.length > 0 && (
-          <div className="grid md:grid-cols-[1fr_320px] gap-8">
-            <div>
+          <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+            <div className="rounded-2xl border border-border bg-card px-4 sm:px-6 shadow-xs">
               {cart.items.map((item) => (
                 <CartItemRow key={item.id} item={item} />
               ))}

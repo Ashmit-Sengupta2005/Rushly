@@ -61,13 +61,13 @@ export function LoginForm() {
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={login.isPending}>
+      <Button type="submit" size="lg" className="w-full" disabled={login.isPending}>
         {login.isPending ? 'Signing in…' : 'Sign in'}
       </Button>
 
       <p className="text-sm text-muted-foreground text-center">
         No account?{' '}
-        <Link to="/register" className="underline underline-offset-4 hover:text-foreground">
+        <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
           Create one
         </Link>
       </p>

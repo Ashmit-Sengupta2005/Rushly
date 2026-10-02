@@ -116,8 +116,8 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-10">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           {/* No "Back to cart": the cart was cleared by the reservation. Cancel
               releases the stock instead of leaving it held for 10 minutes. */}
