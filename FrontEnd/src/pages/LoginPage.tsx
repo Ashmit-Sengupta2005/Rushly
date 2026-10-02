@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router';
 import { LoginForm } from '@/features/auth/LoginForm';
+import { GoogleSignInButton } from '@/features/auth/GoogleSignInButton';
 import { useAuth, useIsAuthenticated } from '@/features/auth/useAuth';
 
 export default function LoginPage() {
@@ -20,6 +21,7 @@ export default function LoginPage() {
           </p>
         </div>
         <LoginForm />
+        <GoogleSignInButton />
       </div>
     </div>
   );

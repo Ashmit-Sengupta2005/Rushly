@@ -98,12 +98,14 @@ export function refreshAccessToken(): Promise<RefreshResponse> {
 }
 
 api.interceptors.response.use(
-  // Normalize login/register responses: they return `tokens` instead of `accessToken`.
+  // Normalize login/register/google responses: they return `tokens` instead of `accessToken`.
   // Rewrite them in-place so the rest of the code only ever sees `accessToken`.
   (response: AxiosResponse) => {
     const url = response.config.url ?? '';
     const isLoginOrRegister =
-      url.endsWith('/auth/login') || url.endsWith('/auth/register');
+      url.endsWith('/auth/login') ||
+      url.endsWith('/auth/register') ||
+      url.endsWith('/auth/google');
     if (isLoginOrRegister && response.data && typeof response.data === 'object') {
       const data = response.data as { tokens?: string; accessToken?: string };
       if (data.tokens && !data.accessToken) {
@@ -124,9 +126,13 @@ api.interceptors.response.use(
     }
 
     // Never try to refresh if the failing request IS /auth/refresh itself —
-    // that would recurse. Also skip /auth/login (wrong password shouldn't
-    // trigger refresh).
-    if (url.endsWith('/auth/refresh') || url.endsWith('/auth/login')) {
+    // that would recurse. Also skip /auth/login and /auth/google (bad
+    // credentials shouldn't trigger refresh).
+    if (
+      url.endsWith('/auth/refresh') ||
+      url.endsWith('/auth/login') ||
+      url.endsWith('/auth/google')
+    ) {
       return Promise.reject(error);
     }
 

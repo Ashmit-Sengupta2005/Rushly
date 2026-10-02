@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router';
 import { RegisterForm } from '@/features/auth/RegisterForm';
+import { GoogleSignInButton } from '@/features/auth/GoogleSignInButton';
 import { useAuth, useIsAuthenticated } from '@/features/auth/useAuth';
 
 export default function RegisterPage() {
@@ -19,6 +20,7 @@ export default function RegisterPage() {
           </p>
         </div>
         <RegisterForm />
+        <GoogleSignInButton text="signup_with" />
       </div>
     </div>
   );

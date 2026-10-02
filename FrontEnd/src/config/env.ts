@@ -6,6 +6,7 @@ interface Env {
   API_URL: string;         // e.g. http://localhost:4000 — or '' for same-origin
   API_BASE: string;        // computed: ${API_URL}/api  (→ '/api' when same-origin)
   STRIPE_PK: string;
+  GOOGLE_CLIENT_ID: string; // '' → Google sign-in button is hidden
   IS_PRODUCTION: boolean;
 }
 
@@ -27,6 +28,8 @@ function readRequired(key: string): string {
 const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? '')
   .trim()
   .replace(/\/$/, ''); // trim trailing slash
+// OPTIONAL. Public OAuth client ID (safe in the browser). Unset → no Google button.
+const GOOGLE_CLIENT_ID = ((import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? '').trim();
 const STRIPE_PK = readRequired('VITE_STRIPE_PUBLISHABLE_KEY');
 
 if (!STRIPE_PK.startsWith('pk_')) {
@@ -39,5 +42,6 @@ export const env: Env = {
   API_URL,
   API_BASE: `${API_URL}/api`,
   STRIPE_PK,
+  GOOGLE_CLIENT_ID,
   IS_PRODUCTION: import.meta.env.PROD,
 };
