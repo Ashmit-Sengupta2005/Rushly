@@ -21,3 +21,8 @@ export const loginSchema = z.object({
   password: z.string().min(1),  // don't leak our password rules on login
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const googleLoginSchema = z.object({
+  credential: z.string().min(1, 'Google credential is required'), // ID token (JWT) from Google Identity Services
+});
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;

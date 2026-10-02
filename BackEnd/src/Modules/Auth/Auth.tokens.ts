@@ -35,7 +35,7 @@ export function signRefreshToken(user: { id: string; refreshTokenVersion: number
     sub: user.id,
     tokenVersion: user.refreshTokenVersion,
     type: 'refresh',}
-    return jwt.sign(payload,env.JWT_ACCESS_SECRET,refreshOpts);
+    return jwt.sign(payload,env.JWT_REFRESH_SECRET,refreshOpts);
 };
 // AccessTokenPayload=token+JWT_ACCESS_SECRET+accessOpts without expires (here + means verify)
 export function verifyAccessToken(token:string):AccessTokenPayload{

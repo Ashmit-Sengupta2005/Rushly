@@ -4,8 +4,9 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import {prisma} from "../../config/prisma.js"
 import { errors } from '../../utils/Errors.js';
 import { signAccessToken,signRefreshToken,verifyRefreshToken } from './Auth.tokens.js';
-import type { RegisterInput, LoginInput } from './Auth.schemas.js';
-import { logger } from '../../utils/logger.js';
+import type { RegisterInput, LoginInput, GoogleLoginInput } from './Auth.schemas.js';
+import { googleClient } from '../../config/google.js';
+import { env } from '../../config/.env.js';
 const argonOptions: HashOptions = {
   type: argon2.argon2id,
   memoryCost: 19456,  // 19 MiB
@@ -73,13 +74,67 @@ export const authService={
       await argon2.verify(DUMMY_HASH, input.password).catch(() => false);
       throw errors.unauthorized('INVALID_CREDENTIALS', 'Invalid email or password');
     }
+    // Google-only accounts have no password — burn the same time and reject identically
+    if (!user.passwordHash) {
+      await argon2.verify(DUMMY_HASH, input.password).catch(() => false);
+      throw errors.unauthorized('INVALID_CREDENTIALS', 'Invalid email or password');
+    }
     const passwordOk = await argon2.verify(user.passwordHash, input.password);
     if (!passwordOk) {
       throw errors.unauthorized('INVALID_CREDENTIALS', 'Invalid email or password');
     }
     const tokens = this.issueTokens(user);
-    logger.info(tokens.refreshToken);
     return { user: toPublicUser(user), tokens };      
+    },
+    async googleLogin(input:GoogleLoginInput):Promise<{user:PublicUser,tokens:TokenBundle}>{
+    // verifyIdToken checks signature (Google's public keys), expiry, issuer and audience.
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: input.credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw errors.unauthorized('INVALID_GOOGLE_TOKEN', 'Google sign-in failed');
+    }
+    // Only trust emails Google has verified — otherwise anyone could claim an
+    // existing user's address and get linked to their account.
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      throw errors.unauthorized('INVALID_GOOGLE_TOKEN', 'Google account email is not verified');
+    }
+    const googleId = payload.sub;
+    const email = payload.email.trim().toLowerCase();
+
+    let user = await prisma.user.findUnique({ where: { googleId } });
+    if (!user) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing) {
+        // Same verified email already registered with a password → link the accounts
+        if (existing.googleId && existing.googleId !== googleId) {
+          throw errors.conflict('GOOGLE_ACCOUNT_MISMATCH', 'This email is linked to a different Google account');
+        }
+        user = await prisma.user.update({ where: { id: existing.id }, data: { googleId } });
+      } else {
+        try {
+          user = await prisma.user.create({
+            data: {
+              email,
+              googleId,
+              name: payload.name?.trim() || email.split('@')[0]!,
+              role: Role.CUSTOMER,
+            },});}
+        catch(err){
+          // Two concurrent first-time sign-ins raced; the other one created the user
+          if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
+            user = await prisma.user.findUnique({ where: { googleId } });
+            if (!user) throw errors.conflict('EMAIL_TAKEN', 'An account with this email already exists');
+          } else throw err;
+        }
+      }
+    }
+    const tokens = this.issueTokens(user);
+    return { user: toPublicUser(user), tokens };
     },
     async refresh(refreshToken:string):Promise<{ tokens: TokenBundle; user: PublicUser }>{
         const payload = verifyRefreshToken(refreshToken);

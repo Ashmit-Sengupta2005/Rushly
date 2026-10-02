@@ -33,6 +33,12 @@ export const authController={
         // User gets the access token and cookie gets set
         res.status(200).json({user,tokens: tokens.accessToken});}),
     
+    googleLogin:asyncHandler(async(req:Request,res:Response)=>{
+        const {user,tokens}=await authService.googleLogin(req.body);
+        setRefreshCookie(res,tokens.refreshToken);
+        // Same response shape as login so the frontend handles both identically
+        res.status(200).json({user,tokens: tokens.accessToken});}),
+
     refresh:asyncHandler(async(req:Request,res:Response)=>{
         const currentRefreshToken=req.cookies?.[REFRESH_COOKIE_NAME];
         if(!currentRefreshToken){

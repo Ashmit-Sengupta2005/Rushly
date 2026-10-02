@@ -5,7 +5,8 @@
 model User {
     id                  String        @id @default(cuid())
     email               String        @unique
-    passwordHash        String
+    passwordHash        String?       // null for Google-only accounts
+    googleId            String?       @unique // Google "sub" claim
     name                String
     role                Role          @default(CUSTOMER)
     refreshTokenVersion Int           @default(0)

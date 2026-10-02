@@ -11,6 +11,9 @@ const schema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('7d'),
   CORS_ORIGIN: z.string().url(),
+  // OAuth client ID from Google Cloud Console (same value as FrontEnd's VITE_GOOGLE_CLIENT_ID).
+  // ID tokens are verified against it as the audience.
+  GOOGLE_CLIENT_ID: z.string().endsWith('.apps.googleusercontent.com'),
   // Proxies in front of the app (see app.ts 'trust proxy'). 1 = Render only;
   // 2 = Vercel /api rewrite → Render.
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
