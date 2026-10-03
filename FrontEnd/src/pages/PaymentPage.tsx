@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { Elements } from '@stripe/react-stripe-js';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { getStripe } from '@/config/stripe';
 import { useReservation } from '@/features/checkout/useReservation';
@@ -60,9 +61,13 @@ export default function PaymentPage() {
   }, [reservation?.status, reservation?.order, reservation?.id, navigate]);
 
   const clientSecret = createIntent.data?.clientSecret;
+  // Match the card form to the site's light/dark mode (appearance is updatable
+  // on a mounted <Elements>, so toggling doesn't wipe what the user typed)
+  const { resolvedTheme } = useTheme();
+  const stripeTheme = resolvedTheme === 'dark' ? ('night' as const) : ('stripe' as const);
   const elementsOptions = useMemo(
-    () => (clientSecret ? { clientSecret, appearance: { theme: 'stripe' as const } } : null),
-    [clientSecret],
+    () => (clientSecret ? { clientSecret, appearance: { theme: stripeTheme } } : null),
+    [clientSecret, stripeTheme],
   );
 
   const handleCancel = () => {

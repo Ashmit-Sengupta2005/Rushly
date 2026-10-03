@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTheme } from 'next-themes';
 import { env } from '@/config/env';
 import { useGoogleLogin } from './useGoogleLogin';
 
@@ -44,6 +45,8 @@ export function GoogleSignInButton({ text = 'signin_with' }: { text?: 'signin_wi
   const containerRef = useRef<HTMLDivElement>(null);
   // TanStack's `mutate` is referentially stable, so it is safe as an effect dependency
   const { mutate, isPending } = useGoogleLogin();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === 'dark';
 
   useEffect(() => {
     if (!env.GOOGLE_CLIENT_ID) return;
@@ -55,8 +58,9 @@ export function GoogleSignInButton({ text = 'signin_with' }: { text?: 'signin_wi
           client_id: env.GOOGLE_CLIENT_ID,
           callback: ({ credential }) => mutate(credential),
         });
+        containerRef.current.replaceChildren(); // re-render on theme change
         window.google.accounts.id.renderButton(containerRef.current, {
-          theme: 'outline',
+          theme: dark ? 'filled_black' : 'outline',
           size: 'large',
           text,
           width: containerRef.current.offsetWidth || 320,
@@ -68,7 +72,7 @@ export function GoogleSignInButton({ text = 'signin_with' }: { text?: 'signin_wi
     return () => {
       cancelled = true;
     };
-  }, [mutate, text]);
+  }, [mutate, text, dark]);
 
   if (!env.GOOGLE_CLIENT_ID) return null;
 

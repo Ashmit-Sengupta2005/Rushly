@@ -14,7 +14,7 @@ export default function CatalogPage() {
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-12">
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl bg-zinc-950 px-6 py-12 sm:px-12 sm:py-16 text-white animate-fade-up">
+        <section className="relative overflow-hidden rounded-3xl bg-zinc-950 ring-1 ring-white/10 px-6 py-12 sm:px-12 sm:py-16 text-white animate-fade-up">
           <div className="absolute inset-0 bg-dot-grid opacity-60" aria-hidden />
           <div
             className="absolute -top-24 -right-16 size-80 rounded-full bg-brand blur-3xl opacity-40"

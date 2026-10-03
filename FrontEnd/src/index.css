@@ -70,7 +70,8 @@
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.91 0.005 75);
     --input: oklch(0.89 0.005 75);
-    --ring: oklch(0.7 0.19 40);
+    --ring: var(--brand);
+    /* Brand = Blaze by default; [data-accent] blocks below swap it */
     --brand: oklch(0.7 0.2 45);
     --brand-2: oklch(0.63 0.25 10);
     --brand-foreground: oklch(0.99 0 0);
@@ -91,27 +92,25 @@
 }
 
 .dark {
-    --brand: oklch(0.74 0.19 48);
-    --brand-2: oklch(0.67 0.24 12);
-    --brand-foreground: oklch(0.99 0 0);
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    /* Ink-black canvas with lifted cards; brand comes from the accent */
+    --background: oklch(0.155 0.008 285);
+    --foreground: oklch(0.97 0.003 75);
+    --card: oklch(0.195 0.008 285);
+    --card-foreground: oklch(0.97 0.003 75);
+    --popover: oklch(0.21 0.008 285);
+    --popover-foreground: oklch(0.97 0.003 75);
+    --primary: oklch(0.97 0.003 75);
+    --primary-foreground: oklch(0.17 0.01 280);
+    --secondary: oklch(0.25 0.008 285);
+    --secondary-foreground: oklch(0.97 0.003 75);
+    --muted: oklch(0.25 0.008 285);
+    --muted-foreground: oklch(0.7 0.01 285);
+    --accent: oklch(0.25 0.008 285);
+    --accent-foreground: oklch(0.97 0.003 75);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --border: oklch(1 0 0 / 9%);
+    --input: oklch(1 0 0 / 14%);
+    --ring: var(--brand);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -125,6 +124,18 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ---------- Accent themes (set on <html data-accent="…">) ----------
+   Must come after :root so they win at equal specificity. Both stops stay
+   dark enough for white text on the gradient. */
+[data-accent="ocean"] {
+    --brand: oklch(0.62 0.19 250);
+    --brand-2: oklch(0.56 0.24 295);
+}
+[data-accent="forest"] {
+    --brand: oklch(0.62 0.15 165);
+    --brand-2: oklch(0.55 0.12 215);
 }
 
 @layer base {

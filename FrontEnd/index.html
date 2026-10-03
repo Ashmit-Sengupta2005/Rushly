@@ -22,6 +22,14 @@
     />
     <!-- <meta property="og:image" content="https://YOUR-APP.vercel.app/og.png" /> -->
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- Apply the saved colour theme before first paint (no flash). Keep the key
+         in sync with src/features/theme/accent.ts. -->
+    <script>
+      try {
+        var accent = localStorage.getItem('rushly-accent');
+        if (accent) document.documentElement.dataset.accent = accent;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

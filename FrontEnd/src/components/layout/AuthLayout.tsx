@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { ShieldCheck, Timer, Zap } from 'lucide-react';
+import { ThemeSwitcher } from '@/features/theme/ThemeSwitcher';
 import { Logo } from './Logo';
 
 const highlights = [
@@ -59,7 +60,8 @@ export function AuthLayout({
       </aside>
 
       {/* Form column */}
-      <main className="flex items-center justify-center px-4 py-12">
+      <main className="relative flex items-center justify-center px-4 py-12">
+        <ThemeSwitcher className="absolute top-4 right-4" />
         <div className="w-full max-w-sm space-y-8 animate-fade-up">
           <Logo className="lg:hidden" />
           <div className="space-y-2">

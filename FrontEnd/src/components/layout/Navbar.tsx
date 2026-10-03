@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/features/auth/useAuth';
 import { useLogout } from '@/features/auth/useLogout';
 import { useCart } from '@/features/cart/useCart';
+import { ThemeSwitcher } from '@/features/theme/ThemeSwitcher';
 import { Logo } from './Logo';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -47,6 +48,8 @@ export function Navbar() {
             <Package className="size-4" />
             <span className="hidden sm:inline">Orders</span>
           </NavLink>
+
+          <ThemeSwitcher />
 
           <Link
             to="/cart"
