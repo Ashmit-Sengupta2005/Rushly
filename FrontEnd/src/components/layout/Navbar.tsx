@@ -1,11 +1,12 @@
 import { Link, NavLink } from 'react-router';
-import { ShoppingBag, Package, LogOut, Sparkles } from 'lucide-react';
+import { ShoppingBag, Package, LogOut, Sparkles, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/features/auth/useAuth';
 import { useLogout } from '@/features/auth/useLogout';
 import { useCart } from '@/features/cart/useCart';
 import { ThemeSwitcher } from '@/features/theme/ThemeSwitcher';
+import { SaleTicker } from '@/features/events/SaleTicker';
 import { Logo } from './Logo';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -36,6 +37,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <SaleTicker />
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         <Logo />
 
@@ -43,6 +45,10 @@ export function Navbar() {
           <NavLink to="/" end className={navLinkClass}>
             <Sparkles className="size-4" />
             <span className="hidden sm:inline">Drops</span>
+          </NavLink>
+          <NavLink to="/events" className={navLinkClass}>
+            <CalendarClock className="size-4" />
+            <span className="hidden sm:inline">Events</span>
           </NavLink>
           <NavLink to="/orders" className={navLinkClass}>
             <Package className="size-4" />

@@ -7,6 +7,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { formatMoney } from '@/lib/formatMoney';
 import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
+import { EventBanner } from '@/features/events/EventBanner';
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -16,6 +17,7 @@ export default function ProductPage() {
   const { data: product, isLoading, isError } = useProduct(slug);
   const addToCart = useAddToCart();
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
 
   if (isLoading) {
     return (
@@ -51,7 +53,7 @@ export default function ProductPage() {
   const stock = product.inventory?.availableStock ?? 0;
   const soldOut = stock <= 0;
   const lowStock = !soldOut && stock <= LOW_STOCK_THRESHOLD;
-  const image = product.images[0];
+  const image = product.images[activeImage] ?? product.images[0];
   // Backend caps a cart line at 100 and rejects more than available stock
   const maxQuantity = Math.min(stock, 100);
 
@@ -77,22 +79,51 @@ export default function ProductPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 py-6 pb-16 grid md:grid-cols-2 gap-8 lg:gap-14 animate-fade-up">
-        <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted ring-1 ring-border">
-          {image ? (
-            <img
-              src={image.url}
-              alt={image.alt ?? product.name}
-              className={cn('h-full w-full object-cover', soldOut && 'grayscale opacity-70')}
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-              <ImageOff className="size-8" aria-label="No image" />
+        <div className="space-y-3">
+          <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted ring-1 ring-border">
+            {image ? (
+              <img
+                src={image.url}
+                alt={image.alt ?? product.name}
+                className={cn('h-full w-full object-cover', soldOut && 'grayscale opacity-70')}
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                <ImageOff className="size-8" aria-label="No image" />
+              </div>
+            )}
+          </div>
+          {product.images.length > 1 && (
+            <div className="flex gap-3">
+              {product.images.map((img, i) => (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => setActiveImage(i)}
+                  aria-label={`Show image ${i + 1}`}
+                  aria-pressed={img === image}
+                  className={cn(
+                    'size-20 overflow-hidden rounded-xl bg-muted ring-2 transition outline-none focus-visible:ring-ring',
+                    img === image ? 'ring-brand' : 'ring-transparent opacity-70 hover:opacity-100',
+                  )}
+                >
+                  <img src={img.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </button>
+              ))}
             </div>
           )}
         </div>
 
         <div className="md:sticky md:top-24 h-fit space-y-7">
           <div className="space-y-3">
+            {product.category && (
+              <Link
+                to={`/?category=${product.category.slug}#shop`}
+                className="block text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground"
+              >
+                {product.category.name}
+              </Link>
+            )}
             {/* Stock status pill */}
             <span
               className={cn(
@@ -113,6 +144,8 @@ export default function ProductPage() {
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tighter">{product.name}</h1>
             <p className="text-2xl font-bold">{formatMoney(product.price)}</p>
           </div>
+
+          {product.category && <EventBanner categorySlug={product.category.slug} />}
 
           {product.description && (
             <p className="text-[0.95rem] text-muted-foreground leading-relaxed">

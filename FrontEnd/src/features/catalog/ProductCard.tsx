@@ -63,6 +63,11 @@ export function ProductCard({ product }: { product: ProductListItem }) {
       </div>
 
       <div className="px-2 pt-3 pb-2 space-y-1">
+        {product.category && (
+          <p className="text-[0.7rem] font-semibold uppercase tracking-widest text-muted-foreground">
+            {product.category.name}
+          </p>
+        )}
         <h3 className="font-medium text-sm truncate">{product.name}</h3>
         <p className={cn('text-base font-bold', soldOut && 'text-muted-foreground line-through')}>
           {formatMoney(product.price)}

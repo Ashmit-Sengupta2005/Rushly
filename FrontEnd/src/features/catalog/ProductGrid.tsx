@@ -1,14 +1,22 @@
 import { useEffect, useRef } from 'react';
-import { Loader2, PackageOpen } from 'lucide-react';
-import { useProducts } from './useProducts';
+import { Loader2, PackageOpen, SearchX } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useProducts, type ProductFilters } from './useProducts';
 import { ProductCard } from './ProductCard';
 
 const gridClass = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6';
 
-export function ProductGrid() {
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useProducts();
+export function ProductGrid({
+  filters = {},
+  onClearFilters,
+}: {
+  filters?: ProductFilters;
+  onClearFilters?: () => void;
+}) {
+  const { data, isLoading, isError, isPlaceholderData, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useProducts(filters);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const filtered = !!(filters.search || filters.categorySlug);
 
   useEffect(() => {
     if (!sentinelRef.current || !hasNextPage) return;
@@ -53,7 +61,24 @@ export function ProductGrid() {
   const items = data?.pages.flatMap((p) => p.items) ?? [];
 
   if (items.length === 0) {
-    return (
+    return filtered ? (
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border py-16 text-center">
+        <SearchX className="size-8 text-muted-foreground mb-1" />
+        <p className="font-medium">No matches</p>
+        <p className="text-sm text-muted-foreground">
+          {filters.search ? `Nothing found for “${filters.search}”.` : 'Nothing in this category right now.'}
+        </p>
+        {onClearFilters && (
+          <button
+            type="button"
+            onClick={onClearFilters}
+            className="mt-2 text-sm font-semibold text-brand hover:underline"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+    ) : (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border py-16 text-center">
         <PackageOpen className="size-8 text-muted-foreground mb-1" />
         <p className="font-medium">No drops right now</p>
@@ -64,7 +89,8 @@ export function ProductGrid() {
 
   return (
     <>
-      <div className={gridClass}>
+      {/* Dim old results while the next filter's results load */}
+      <div className={cn(gridClass, 'transition-opacity', isPlaceholderData && 'opacity-50')}>
         {items.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

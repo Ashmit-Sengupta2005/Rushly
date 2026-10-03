@@ -92,20 +92,20 @@
 }
 
 .dark {
-    /* Ink-black canvas with lifted cards; brand comes from the accent */
-    --background: oklch(0.155 0.008 285);
+    /* Near-black canvas with subtly lifted cards; brand comes from the accent */
+    --background: oklch(0.125 0.006 285);
     --foreground: oklch(0.97 0.003 75);
-    --card: oklch(0.195 0.008 285);
+    --card: oklch(0.165 0.007 285);
     --card-foreground: oklch(0.97 0.003 75);
-    --popover: oklch(0.21 0.008 285);
+    --popover: oklch(0.185 0.008 285);
     --popover-foreground: oklch(0.97 0.003 75);
     --primary: oklch(0.97 0.003 75);
     --primary-foreground: oklch(0.17 0.01 280);
-    --secondary: oklch(0.25 0.008 285);
+    --secondary: oklch(0.22 0.008 285);
     --secondary-foreground: oklch(0.97 0.003 75);
-    --muted: oklch(0.25 0.008 285);
+    --muted: oklch(0.22 0.008 285);
     --muted-foreground: oklch(0.7 0.01 285);
-    --accent: oklch(0.25 0.008 285);
+    --accent: oklch(0.22 0.008 285);
     --accent-foreground: oklch(0.97 0.003 75);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 9%);

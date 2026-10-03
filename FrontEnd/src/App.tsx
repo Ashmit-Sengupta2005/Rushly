@@ -16,11 +16,13 @@ import CheckoutCompletePage from '@/pages/CheckoutCompletePage';
 import OrdersPage from '@/pages/OrdersPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import EventsPage from '@/pages/EventsPage';
 
 export default function App() {
   return (
-    // Light/dark mode: toggles the `dark` class on <html>; persisted in localStorage
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    // Light/dark mode: toggles the `dark` class on <html>; persisted in localStorage.
+    // Dark by default — the storefront is designed dark-first; users can still switch.
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
@@ -42,6 +44,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ProductPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/events"
+                element={
+                  <ProtectedRoute>
+                    <EventsPage />
                   </ProtectedRoute>
                 }
               />

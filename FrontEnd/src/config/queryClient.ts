@@ -40,6 +40,9 @@ export const queryKeys = {
     list: (filters?: object) => ['products', 'list', filters ?? {}] as const,
     detail: (slug: string) => ['products', 'detail', slug] as const,
   },
+  categories: {
+    all: ['categories'] as const,
+  },
   cart: {
     me: ['cart', 'me'] as const,
   },
