@@ -114,17 +114,26 @@ async function main(){
   console.log(`✅ Retired ${retired.count} legacy products`);
 
   // 7. Product lists/details and event rules are cached in Redis — clear them
-  // so the new catalog shows up immediately. Stock is synced to Redis on
-  // server boot, so restart the backend after seeding to make new products
-  // purchasable.
+  // so the new catalog shows up immediately, and load stock for new products.
   if (process.env.REDIS_URL) {
     const redis = new Redis(process.env.REDIS_URL);
     try {
       const keys = [...(await redis.keys('products:*')), ...(await redis.keys('events:*'))];
       if (keys.length) await redis.del(...keys);
       console.log(`✅ Cleared ${keys.length} cached keys`);
+
+      // Checkout reserves stock in Redis, which the server only loads at boot.
+      // Load NEW products now (SET NX: never overwrite live stock that may have
+      // holds against it) so they're purchasable without a restart.
+      // Key format must match stockKey() in Modules/CheckOut/Inventory.redis.ts
+      const inventories = await prisma.inventory.findMany({ select: { productId: true, availableStock: true } });
+      const pipeline = redis.pipeline();
+      for (const inv of inventories) pipeline.set(`inventory:${inv.productId}`, inv.availableStock, 'NX');
+      const results = await pipeline.exec();
+      const added = results?.filter(([, res]) => res === 'OK').length ?? 0;
+      console.log(`✅ Loaded stock into Redis for ${added} new products`);
     } catch (err) {
-      console.warn('⚠️  Could not clear cache (entries expire within 5 min):', err);
+      console.warn('⚠️  Redis step failed — restart the server so it loads stock at boot:', err);
     } finally {
       redis.disconnect();
     }
