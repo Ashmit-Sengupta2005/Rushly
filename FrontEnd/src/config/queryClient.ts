@@ -43,6 +43,22 @@ export const queryKeys = {
   categories: {
     all: ['categories'] as const,
   },
+  events: {
+    schedule: ['events', 'schedule'] as const,
+  },
+  wishlist: {
+    me: ['wishlist', 'me'] as const,
+  },
+  restockAlerts: {
+    me: ['restock-alerts', 'me'] as const,
+  },
+  activity: {
+    recentSales: ['activity', 'recent-sales'] as const,
+  },
+  admin: {
+    overview: (days: number) => ['admin', 'overview', days] as const,
+    revenue: (days: number) => ['admin', 'revenue', days] as const,
+  },
   cart: {
     me: ['cart', 'me'] as const,
   },

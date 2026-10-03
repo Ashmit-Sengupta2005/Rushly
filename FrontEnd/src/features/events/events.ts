@@ -1,145 +1,53 @@
-// Flash-sale calendar. Events recur on a fixed weekly schedule in IST, so the
-// calendar is always populated without an admin keeping dates up to date.
-// categorySlug must match a category from the backend seed — "Shop the drop"
-// links filter the catalog by it.
-
-export interface FlashEvent {
-  id: string;
-  title: string;
-  tagline: string;
-  categorySlug: string;
-  categoryName: string;
-  image: string;
-  /** IST weekdays it runs on (0 = Sunday). Omit for every day. */
-  days?: number[];
-  /** Start time in IST, 24h "HH:MM" */
-  startTime: string;
-  durationMinutes: number;
-}
+// Flash-sale calendar helpers. The schedule comes from GET /api/events (see
+// useEvents.ts) as concrete [start, end) windows; live/upcoming is derived
+// here from the ticking clock so countdowns flip state without refetching.
+import type { EventOccurrenceDto, FlashEventInfo, ProductListItem } from '@/types/api';
 
 export interface EventOccurrence {
-  event: FlashEvent;
+  event: FlashEventInfo;
   start: number; // epoch ms
   end: number;
   status: 'live' | 'upcoming';
 }
 
-const unsplash = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
-
-export const FLASH_EVENTS: FlashEvent[] = [
-  {
-    id: 'midnight-sneaker-drop',
-    title: 'Midnight Sneaker Drop',
-    tagline: 'Limited pairs land at 12 AM sharp. Set an alarm.',
-    categorySlug: 'shoes',
-    categoryName: 'Shoes',
-    image: unsplash('1542291026-7eec264c27ff'),
-    startTime: '00:00',
-    durationMinutes: 180,
-  },
-  {
-    id: 'lunch-break-tees',
-    title: 'Lunch Break Tees',
-    tagline: 'Fresh graphic tees for the midday scroll, weekdays only.',
-    categorySlug: 't-shirts',
-    categoryName: 'T-Shirts',
-    image: unsplash('1562157873-818bc0726f68'),
-    days: [1, 2, 3, 4, 5],
-    startTime: '13:00',
-    durationMinutes: 120,
-  },
-  {
-    id: 'golden-hour-goodies',
-    title: 'Golden Hour Goodies',
-    tagline: 'Mugs, totes, stickers and desk merch. Small prices, fast sell-outs.',
-    categorySlug: 'goodies',
-    categoryName: 'Goodies',
-    image: unsplash('1572375992501-4b0892d50c69'),
-    startTime: '18:00',
-    durationMinutes: 120,
-  },
-  {
-    id: 'tech-tuesday',
-    title: 'Tech Tuesday',
-    tagline: 'Headphones, wearables and speakers in a four-hour window.',
-    categorySlug: 'tech',
-    categoryName: 'Tech',
-    image: unsplash('1505740420928-5e560c06d30e'),
-    days: [2],
-    startTime: '20:00',
-    durationMinutes: 240,
-  },
-  {
-    id: 'accessories-after-dark',
-    title: 'Accessories After Dark',
-    tagline: 'Caps, shades and bags drop every Friday night.',
-    categorySlug: 'accessories',
-    categoryName: 'Accessories',
-    image: unsplash('1572635196237-14b3f281503f'),
-    days: [5],
-    startTime: '21:00',
-    durationMinutes: 180,
-  },
-  {
-    id: 'weekend-outerwear-vault',
-    title: 'Weekend Outerwear Vault',
-    tagline: 'Hoodies and jackets. The vault stays open all weekend.',
-    categorySlug: 'hoodies',
-    categoryName: 'Hoodies & Jackets',
-    image: unsplash('1509942774463-acf339cf87d5'),
-    days: [6],
-    startTime: '10:00',
-    durationMinutes: 36 * 60, // Sat 10 AM → Sun 10 PM
-  },
-];
-
 export const TIME_ZONE = 'Asia/Kolkata';
-// IST has no daylight saving, so a fixed offset is exact
-const IST_OFFSET_MS = 330 * 60_000;
 const DAY_MS = 86_400_000;
 
-/** Occurrences of one event that overlap [from, to). */
-function occurrencesBetween(event: FlashEvent, from: number, to: number): EventOccurrence[] {
-  const [hh, mm] = event.startTime.split(':').map(Number);
-  const duration = event.durationMinutes * 60_000;
-  const result: EventOccurrence[] = [];
-  // Walk IST calendar days, starting early enough to catch a multi-day event already running
-  const firstDay = Math.floor((from + IST_OFFSET_MS - duration) / DAY_MS) - 1;
-  const lastDay = Math.floor((to + IST_OFFSET_MS) / DAY_MS);
-  for (let day = firstDay; day <= lastDay; day++) {
-    // Day 0 of the Unix epoch was a Thursday (4)
-    const weekday = (day + 4) % 7;
-    if (event.days && !event.days.includes(weekday)) continue;
-    const start = day * DAY_MS + (hh! * 60 + mm!) * 60_000 - IST_OFFSET_MS;
-    const end = start + duration;
-    if (end <= from || start >= to) continue;
-    result.push({ event, start, end, status: start <= from ? 'live' : 'upcoming' });
-  }
-  return result;
+/** Live or upcoming occurrences within the next `days` days, soonest first. */
+export function getSchedule(raw: EventOccurrenceDto[], now: number, days = 7): EventOccurrence[] {
+  return raw
+    .map((o) => ({ event: o.event, start: Date.parse(o.start), end: Date.parse(o.end) }))
+    .filter((o) => o.end > now && o.start < now + days * DAY_MS)
+    .map((o) => ({ ...o, status: o.start <= now ? ('live' as const) : ('upcoming' as const) }))
+    .sort((a, b) => a.start - b.start);
 }
 
-/** Every live or upcoming occurrence in the next `days` days, soonest first. */
-export function getSchedule(now: number, days = 7): EventOccurrence[] {
-  return FLASH_EVENTS.flatMap((e) => occurrencesBetween(e, now, now + days * DAY_MS)).sort(
-    (a, b) => a.start - b.start,
-  );
-}
-
-export function getLiveEvents(now: number) {
-  return getSchedule(now, 1)
+export function getLiveEvents(raw: EventOccurrenceDto[], now: number) {
+  return getSchedule(raw, now)
     .filter((o) => o.status === 'live')
     .sort((a, b) => a.end - b.end);
 }
 
 /** The live event ending soonest, otherwise the next one to start. */
-export function getSpotlight(now: number): EventOccurrence | undefined {
-  return getLiveEvents(now)[0] ?? getSchedule(now).find((o) => o.status === 'upcoming');
+export function getSpotlight(raw: EventOccurrenceDto[], now: number): EventOccurrence | undefined {
+  return getLiveEvents(raw, now)[0] ?? getSchedule(raw, now).find((o) => o.status === 'upcoming');
 }
 
 /** Live (or next) occurrence for a category, for product-page banners. */
-export function getCategoryEvent(categorySlug: string, now: number) {
-  return getSchedule(now).find((o) => o.event.categorySlug === categorySlug);
+export function getCategoryEvent(raw: EventOccurrenceDto[], categorySlug: string, now: number) {
+  return getSchedule(raw, now, 14).find((o) => o.event.categorySlug === categorySlug);
+}
+
+/**
+ * Mirrors the backend's DROP_NOT_LIVE rule: a drop exclusive is locked unless
+ * an event for its category is live. Returns the occurrence that unlocks it,
+ * or null when it can be bought now. The server re-checks at checkout.
+ */
+export function getDropLock(product: ProductListItem, raw: EventOccurrenceDto[], now: number) {
+  if (!product.isDropExclusive || !product.category) return null;
+  const next = getCategoryEvent(raw, product.category.slug, now);
+  if (!next || next.status === 'live') return null;
+  return next;
 }
 
 // ------------------------------------------------------------
@@ -176,6 +84,12 @@ export function formatDayLabel(ms: number, now: number) {
   if (dayKey(ms) === dayKey(now)) return 'Today';
   if (dayKey(ms) === dayKey(now + DAY_MS)) return 'Tomorrow';
   return formatDate(ms);
+}
+
+/** Mid-sentence form: "today" / "tomorrow" / "on Mon, 5 Oct". */
+export function formatDayPhrase(ms: number, now: number) {
+  const label = formatDayLabel(ms, now);
+  return label === 'Today' || label === 'Tomorrow' ? label.toLowerCase() : `on ${label}`;
 }
 
 /** Splits a duration into countdown parts. Never negative. */

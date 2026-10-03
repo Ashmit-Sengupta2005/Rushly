@@ -10,3 +10,15 @@ export function formatMoney(paise: number): string {
     maximumFractionDigits: 2,
   }).format(rupees);
 }
+
+const compactMoney = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+/** Axis/summary labels: "₹1.2L", "₹45K". Not for prices people pay. */
+export function formatCompactMoney(paise: number): string {
+  return compactMoney.format(paise / 100);
+}

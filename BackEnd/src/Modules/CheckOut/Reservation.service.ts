@@ -8,6 +8,7 @@ import { env } from "../../config/.env.js";
 import { reservationExpiryQueue } from "../../config/queues.js";
 import { reserveStock,releaseStock } from "./Inventory.redis.js";
 import type { ShippingAddressInput } from "./Checkout.schemas.js";
+import { eventsService } from "../Events/Events.service.js";
 
 export const reservationService={
     /**
@@ -27,7 +28,7 @@ export const reservationService={
             items:{
                 include:{
                     product:{
-                        select:{id:true,isActive:true,price:true},
+                        select:{id:true,name:true,isActive:true,price:true,categoryId:true,isDropExclusive:true},
                     },
                 },
             },
@@ -45,6 +46,9 @@ export const reservationService={
         });
       }
     }
+    // Authoritative drop-window check — add-to-cart checked too, but the
+    // event may have ended while the item sat in the cart.
+    await eventsService.assertPurchasable(cart.items.map((item) => item.product));
     // Generate per-item hold ids upfront.
     // We need holdIds BEFORE calling Redis so we can pass them to the Lua
     // script and store them in Postgres in the same shape.

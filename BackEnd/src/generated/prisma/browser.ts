@@ -53,6 +53,21 @@ export type Product = Prisma.ProductModel
  */
 export type ProductImage = Prisma.ProductImageModel
 /**
+ * Model WishlistItem
+ * 
+ */
+export type WishlistItem = Prisma.WishlistItemModel
+/**
+ * Model RestockAlert
+ * 
+ */
+export type RestockAlert = Prisma.RestockAlertModel
+/**
+ * Model FlashEvent
+ * 
+ */
+export type FlashEvent = Prisma.FlashEventModel
+/**
  * Model Order
  * 
  */

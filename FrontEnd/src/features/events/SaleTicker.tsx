@@ -1,13 +1,15 @@
 import { Link } from 'react-router';
 import { ArrowRight, Clock } from 'lucide-react';
 import { useNow } from './useNow';
+import { useEventSchedule } from './useEvents';
 import { formatClock, formatCountdown, formatDate, getSpotlight } from './events';
 
 // Thin strip above the navbar: the live (or next) flash sale with a countdown,
 // plus the current IST time.
 export function SaleTicker() {
   const now = useNow();
-  const spotlight = getSpotlight(now);
+  const schedule = useEventSchedule();
+  const spotlight = getSpotlight(schedule, now);
 
   return (
     <div className="relative overflow-hidden bg-zinc-950 text-white border-b border-white/10">

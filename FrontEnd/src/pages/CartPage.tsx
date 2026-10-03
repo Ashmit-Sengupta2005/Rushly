@@ -5,6 +5,7 @@ import { CartItemRow } from '@/features/cart/CartItemRow';
 import { CartSummary } from '@/features/cart/CartSummary';
 import { buttonVariants } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
+import { ProductRow } from '@/features/catalog/ProductRow';
 
 export default function CartPage() {
   const { data: cart, isLoading, isError } = useCart();
@@ -58,6 +59,12 @@ export default function CartPage() {
             <Link to="/" className={buttonVariants({ variant: 'brand', size: 'lg' })}>
               Browse drops
             </Link>
+          </div>
+        )}
+
+        {cart && cart.items.length === 0 && (
+          <div className="mt-14">
+            <ProductRow eyebrow="Still in stock" title="Trending right now" />
           </div>
         )}
 

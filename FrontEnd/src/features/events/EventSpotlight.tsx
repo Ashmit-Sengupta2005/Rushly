@@ -1,14 +1,16 @@
 import { Link } from 'react-router';
 import { ArrowRight, CalendarClock } from 'lucide-react';
 import { useNow } from './useNow';
+import { useEventSchedule } from './useEvents';
 import { CountdownBlocks } from './CountdownBlocks';
-import { formatDayLabel, formatTime, getSpotlight } from './events';
+import { formatDayPhrase, formatTime, getSpotlight } from './events';
 
 // Hero card: the live flash sale (ends-in countdown) or the next one (starts-in).
 // Designed for the dark hero panel.
 export function EventSpotlight() {
   const now = useNow();
-  const spotlight = getSpotlight(now);
+  const schedule = useEventSchedule();
+  const spotlight = getSpotlight(schedule, now);
   if (!spotlight) return null;
 
   const { event, start, end, status } = spotlight;
@@ -44,8 +46,8 @@ export function EventSpotlight() {
           <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
             <CalendarClock className="size-3.5" />
             {live
-              ? `Ends ${formatDayLabel(end, now).toLowerCase()} at ${formatTime(end)} IST`
-              : `Starts ${formatDayLabel(start, now).toLowerCase()} at ${formatTime(start)} IST`}
+              ? `Ends ${formatDayPhrase(end, now)} at ${formatTime(end)} IST`
+              : `Starts ${formatDayPhrase(start, now)} at ${formatTime(start)} IST`}
           </p>
         </div>
 

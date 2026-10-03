@@ -404,6 +404,9 @@ export const ModelName = {
   Category: 'Category',
   Product: 'Product',
   ProductImage: 'ProductImage',
+  WishlistItem: 'WishlistItem',
+  RestockAlert: 'RestockAlert',
+  FlashEvent: 'FlashEvent',
   Order: 'Order',
   OrderItem: 'OrderItem',
   OrderStatusHistory: 'OrderStatusHistory',
@@ -429,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "inventory" | "auditLog" | "cart" | "cartItem" | "category" | "product" | "productImage" | "order" | "orderItem" | "orderStatusHistory" | "outboxEvent" | "processedWebhookEvent" | "refund" | "reservation" | "reservationItem" | "user" | "address"
+    modelProps: "inventory" | "auditLog" | "cart" | "cartItem" | "category" | "product" | "productImage" | "wishlistItem" | "restockAlert" | "flashEvent" | "order" | "orderItem" | "orderStatusHistory" | "outboxEvent" | "processedWebhookEvent" | "refund" | "reservation" | "reservationItem" | "user" | "address"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -948,6 +951,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductImageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    WishlistItem: {
+      payload: Prisma.$WishlistItemPayload<ExtArgs>
+      fields: Prisma.WishlistItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WishlistItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WishlistItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        findFirst: {
+          args: Prisma.WishlistItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WishlistItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        findMany: {
+          args: Prisma.WishlistItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+        }
+        create: {
+          args: Prisma.WishlistItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        createMany: {
+          args: Prisma.WishlistItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WishlistItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+        }
+        delete: {
+          args: Prisma.WishlistItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        update: {
+          args: Prisma.WishlistItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.WishlistItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WishlistItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WishlistItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.WishlistItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+        }
+        aggregate: {
+          args: Prisma.WishlistItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWishlistItem>
+        }
+        groupBy: {
+          args: Prisma.WishlistItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WishlistItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WishlistItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WishlistItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    RestockAlert: {
+      payload: Prisma.$RestockAlertPayload<ExtArgs>
+      fields: Prisma.RestockAlertFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RestockAlertFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RestockAlertFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        findFirst: {
+          args: Prisma.RestockAlertFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RestockAlertFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        findMany: {
+          args: Prisma.RestockAlertFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>[]
+        }
+        create: {
+          args: Prisma.RestockAlertCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        createMany: {
+          args: Prisma.RestockAlertCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RestockAlertCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>[]
+        }
+        delete: {
+          args: Prisma.RestockAlertDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        update: {
+          args: Prisma.RestockAlertUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        deleteMany: {
+          args: Prisma.RestockAlertDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RestockAlertUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RestockAlertUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>[]
+        }
+        upsert: {
+          args: Prisma.RestockAlertUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RestockAlertPayload>
+        }
+        aggregate: {
+          args: Prisma.RestockAlertAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRestockAlert>
+        }
+        groupBy: {
+          args: Prisma.RestockAlertGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RestockAlertGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RestockAlertCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RestockAlertCountAggregateOutputType> | number
+        }
+      }
+    }
+    FlashEvent: {
+      payload: Prisma.$FlashEventPayload<ExtArgs>
+      fields: Prisma.FlashEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FlashEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FlashEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        findFirst: {
+          args: Prisma.FlashEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FlashEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        findMany: {
+          args: Prisma.FlashEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>[]
+        }
+        create: {
+          args: Prisma.FlashEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        createMany: {
+          args: Prisma.FlashEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FlashEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>[]
+        }
+        delete: {
+          args: Prisma.FlashEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        update: {
+          args: Prisma.FlashEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.FlashEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FlashEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FlashEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.FlashEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlashEventPayload>
+        }
+        aggregate: {
+          args: Prisma.FlashEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFlashEvent>
+        }
+        groupBy: {
+          args: Prisma.FlashEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FlashEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FlashEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FlashEventCountAggregateOutputType> | number
         }
       }
     }
@@ -1796,6 +2021,7 @@ export const ProductScalarFieldEnum = {
   price: 'price',
   categoryId: 'categoryId',
   isActive: 'isActive',
+  isDropExclusive: 'isDropExclusive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1812,6 +2038,45 @@ export const ProductImageScalarFieldEnum = {
 } as const
 
 export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
+
+
+export const WishlistItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
+
+
+export const RestockAlertScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt',
+  notifiedAt: 'notifiedAt'
+} as const
+
+export type RestockAlertScalarFieldEnum = (typeof RestockAlertScalarFieldEnum)[keyof typeof RestockAlertScalarFieldEnum]
+
+
+export const FlashEventScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  tagline: 'tagline',
+  image: 'image',
+  categoryId: 'categoryId',
+  daysOfWeek: 'daysOfWeek',
+  startTime: 'startTime',
+  durationMinutes: 'durationMinutes',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FlashEventScalarFieldEnum = (typeof FlashEventScalarFieldEnum)[keyof typeof FlashEventScalarFieldEnum]
 
 
 export const OrderScalarFieldEnum = {
@@ -2311,6 +2576,9 @@ export type GlobalOmitConfig = {
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
   productImage?: Prisma.ProductImageOmit
+  wishlistItem?: Prisma.WishlistItemOmit
+  restockAlert?: Prisma.RestockAlertOmit
+  flashEvent?: Prisma.FlashEventOmit
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit
   orderStatusHistory?: Prisma.OrderStatusHistoryOmit

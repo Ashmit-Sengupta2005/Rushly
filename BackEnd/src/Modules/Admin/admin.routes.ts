@@ -4,7 +4,7 @@ import { requireAuth,requireRole } from "../Auth/Auth.middleware.js";
 import { refundController } from "./refund.controller.js";
 import { metricControllers } from "./metrics.controllers.js";
 import { initiateRefundSchema,orderIdParamsSchema } from "./refund.schemas.js";
-import { revenueByDayQuerySchema } from "./metrics.schemas.js";
+import { revenueByDayQuerySchema, overviewQuerySchema } from "./metrics.schemas.js";
 
 export const adminRouter=Router();
 
@@ -24,4 +24,9 @@ adminRouter.get(
   '/metrics/revenue',
   validate.query(revenueByDayQuerySchema),
   metricControllers.revenueByDay,
+);
+adminRouter.get(
+  '/metrics/overview',
+  validate.query(overviewQuerySchema),
+  metricControllers.overview,
 );

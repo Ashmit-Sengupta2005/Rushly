@@ -58,6 +58,9 @@ export const ModelName = {
   Category: 'Category',
   Product: 'Product',
   ProductImage: 'ProductImage',
+  WishlistItem: 'WishlistItem',
+  RestockAlert: 'RestockAlert',
+  FlashEvent: 'FlashEvent',
   Order: 'Order',
   OrderItem: 'OrderItem',
   OrderStatusHistory: 'OrderStatusHistory',
@@ -152,6 +155,7 @@ export const ProductScalarFieldEnum = {
   price: 'price',
   categoryId: 'categoryId',
   isActive: 'isActive',
+  isDropExclusive: 'isDropExclusive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -168,6 +172,45 @@ export const ProductImageScalarFieldEnum = {
 } as const
 
 export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
+
+
+export const WishlistItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
+
+
+export const RestockAlertScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt',
+  notifiedAt: 'notifiedAt'
+} as const
+
+export type RestockAlertScalarFieldEnum = (typeof RestockAlertScalarFieldEnum)[keyof typeof RestockAlertScalarFieldEnum]
+
+
+export const FlashEventScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  tagline: 'tagline',
+  image: 'image',
+  categoryId: 'categoryId',
+  daysOfWeek: 'daysOfWeek',
+  startTime: 'startTime',
+  durationMinutes: 'durationMinutes',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FlashEventScalarFieldEnum = (typeof FlashEventScalarFieldEnum)[keyof typeof FlashEventScalarFieldEnum]
 
 
 export const OrderScalarFieldEnum = {

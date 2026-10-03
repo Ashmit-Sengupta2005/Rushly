@@ -2,12 +2,14 @@ import { Link } from 'react-router';
 import { CalendarClock, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNow } from './useNow';
+import { useEventSchedule } from './useEvents';
 import { formatCountdown, formatDayLabel, formatTime, getCategoryEvent } from './events';
 
 // Product-page strip: "Part of <event> — ends in …" or "Next drop: … starts in …".
 export function EventBanner({ categorySlug }: { categorySlug: string }) {
   const now = useNow();
-  const occurrence = getCategoryEvent(categorySlug, now);
+  const schedule = useEventSchedule();
+  const occurrence = getCategoryEvent(schedule, categorySlug, now);
   if (!occurrence) return null;
 
   const { event, start, end, status } = occurrence;

@@ -101,6 +101,8 @@ export interface ProductListItem {
   images: ProductImage[];
   category?: ProductCategory | null; // null when the product has no category
   inventory?: ProductInventory | null;
+  /** Only purchasable while a flash event for its category is live */
+  isDropExclusive?: boolean;
 }
 
 /** Shape of a product in the detail endpoint (full). */
@@ -353,4 +355,92 @@ export interface OrdersListResponse {
 
 export interface OrderDetailResponse {
   order: OrderDetail;
+}
+// ============================================================
+// Flash events
+// ============================================================
+export interface FlashEventInfo {
+  id: string;
+  slug: string;
+  title: string;
+  tagline: string;
+  image: string;
+  categorySlug: string;
+  categoryName: string;
+}
+
+/** One concrete sale window. Live/upcoming is derived from start/end client-side. */
+export interface EventOccurrenceDto {
+  event: FlashEventInfo;
+  start: string; // ISO
+  end: string; // ISO
+}
+
+export interface EventsScheduleResponse {
+  serverTime: string;
+  occurrences: EventOccurrenceDto[];
+}
+
+// ============================================================
+// Engagement
+// ============================================================
+export interface WishlistResponse {
+  items: ProductListItem[];
+}
+
+export interface RestockAlertsResponse {
+  productIds: string[];
+}
+
+/** Anonymous — product, city and time only. */
+export interface RecentSale {
+  id: string;
+  productName: string;
+  productSlug: string;
+  image: string | null;
+  city: string | null;
+  purchasedAt: string;
+}
+
+export interface RecentSalesResponse {
+  sales: RecentSale[];
+}
+
+// ============================================================
+// Admin
+// ============================================================
+export interface RevenueDay {
+  day: string; // YYYY-MM-DD
+  orderCount: number;
+  revenuePaise: number;
+}
+
+export interface RevenueResponse {
+  data: RevenueDay[];
+  summary: { totalRevenuePaise: number; totalOrders: number; averageDailyRevenuePaise: number };
+}
+
+export interface AdminOverview {
+  days: number;
+  kpis: {
+    revenuePaise: number;
+    orders: number;
+    averageOrderPaise: number;
+    unitsSold: number;
+    refundedPaise: number;
+    liveHolds: number;
+  };
+  topProducts: { productId: string; name: string; units: number; revenuePaise: number }[];
+  categories: { category: string; units: number; revenuePaise: number }[];
+  lowStock: { productId: string; name: string; slug: string; availableStock: number; totalStock: number }[];
+  recentOrders: {
+    id: string;
+    status: OrderStatus;
+    totalAmount: number;
+    createdAt: string;
+    customerName: string;
+    customerEmail: string;
+    itemCount: number;
+    refundedAmount: number;
+  }[];
 }

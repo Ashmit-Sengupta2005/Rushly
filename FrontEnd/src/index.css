@@ -184,3 +184,14 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up { animation: none; }
 }
+/* Infinite marquee: the track holds the items twice and slides by half its width */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@utility animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}

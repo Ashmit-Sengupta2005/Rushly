@@ -2,6 +2,8 @@ import { prisma } from '../config/prisma.js';
 import { logger } from '../utils/logger.js';
 import { emailService } from '../utils/email.service.js';
 import { emailTemplates } from '../utils/email.templates.js';
+import { env } from '../config/.env.js';
+import type { RestockNotificationPayload } from '../Modules/Engagement/RestockAlerts.service.js';
 // ============================================================
 // Configuration — knobs you might tune
 // ============================================================
@@ -87,6 +89,35 @@ const dispatchers: Record<string, Dispatcher> = {
       orderId: data.orderId,
       totalRefunded: data.totalRefunded,
       currency: data.currency,
+    });
+
+    await emailService.send({
+      to: user.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  },
+
+  restock_notification: async (payload) => {
+    const data = payload as RestockNotificationPayload;
+
+    const [user, product] = await Promise.all([
+      prisma.user.findUnique({ where: { id: data.userId }, select: { email: true, name: true } }),
+      prisma.product.findUnique({
+        where: { id: data.productId },
+        select: { name: true, slug: true, price: true, images: { orderBy: { position: 'asc' }, take: 1 } },
+      }),
+    ]);
+    if (!user) throw new Error(`User ${data.userId} not found`);
+    if (!product) throw new Error(`Product ${data.productId} not found`);
+
+    const template = emailTemplates.restockNotification({
+      customerName: user.name,
+      productName: product.name,
+      productUrl: `${env.CORS_ORIGIN}/products/${product.slug}`, // CORS_ORIGIN is the storefront URL
+      imageUrl: product.images[0]?.url ?? null,
+      price: product.price,
     });
 
     await emailService.send({

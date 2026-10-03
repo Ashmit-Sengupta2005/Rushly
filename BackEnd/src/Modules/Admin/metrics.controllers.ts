@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { metricService } from './metrics.service.js';
-import type { RevenueByDayQuery } from './metrics.schemas.js';
+import type { RevenueByDayQuery, OverviewQuery } from './metrics.schemas.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 
 export const metricControllers={
@@ -20,4 +20,7 @@ export const metricControllers={
             averageDailyRevenueRupees: averageDailyRevenue / 100,},
         });
         }),
+    overview:asyncHandler(async(req:Request,res:Response)=>{
+        res.json(await metricService.overview(req.validatedQuery as OverviewQuery));
+    }),
 };

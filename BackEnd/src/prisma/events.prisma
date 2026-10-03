@@ -1,0 +1,22 @@
+// ============================================================
+// FLASH EVENTS — recurring, time-boxed sales per category
+// ============================================================
+// Stored as a weekly recurrence rule rather than concrete dates, so the
+// calendar never runs dry. Occurrences are computed in Modules/Events.
+model FlashEvent {
+    id              String   @id @default(cuid())
+    slug            String   @unique
+    title           String
+    tagline         String
+    image           String
+    categoryId      String
+    category        Category @relation(fields: [categoryId], references: [id])
+    daysOfWeek      Int[] // IST weekdays, 0 = Sunday. Empty = every day
+    startTime       String // "HH:MM" in IST (no DST, so a fixed +05:30 offset)
+    durationMinutes Int
+    isActive        Boolean  @default(true)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@index([categoryId])
+}

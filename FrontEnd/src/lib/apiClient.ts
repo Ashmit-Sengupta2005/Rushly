@@ -219,6 +219,9 @@ export const apiClient = {
   patch: <T>(url: string, body?: unknown, config?: AxiosRequestConfig) =>
     api.patch<T>(url, body, config).then((r) => r.data),
 
+  put: <T>(url: string, body?: unknown, config?: AxiosRequestConfig) =>
+    api.put<T>(url, body, config).then((r) => r.data),
+
   delete: <T>(url: string, config?: AxiosRequestConfig) =>
     api.delete<T>(url, config).then((r) => r.data),
 };

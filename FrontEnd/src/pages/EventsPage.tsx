@@ -5,6 +5,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNow } from '@/features/events/useNow';
+import { useEventSchedule } from '@/features/events/useEvents';
 import { CountdownBlocks } from '@/features/events/CountdownBlocks';
 import {
   dayKey,
@@ -12,6 +13,7 @@ import {
   formatCountdown,
   formatDate,
   formatDayLabel,
+  formatDayPhrase,
   formatTime,
   getSchedule,
   googleCalendarUrl,
@@ -26,7 +28,8 @@ const howItWorks = [
 
 export default function EventsPage() {
   const now = useNow();
-  const schedule = getSchedule(now, 7);
+  const raw = useEventSchedule();
+  const schedule = getSchedule(raw, now, 7);
   const live = schedule.filter((o) => o.status === 'live');
   const upcoming = schedule.filter((o) => o.status === 'upcoming');
 
@@ -78,7 +81,10 @@ export default function EventsPage() {
             <div key={key} className="grid gap-3 md:grid-cols-[9rem_1fr]">
               <div className="md:pt-4">
                 <p className="font-bold">{formatDayLabel(occurrences[0]!.start, now)}</p>
-                <p className="text-xs text-muted-foreground">{formatDate(occurrences[0]!.start)}</p>
+                {/* Today/Tomorrow get the date underneath; other days already show it */}
+                {formatDayLabel(occurrences[0]!.start, now) !== formatDate(occurrences[0]!.start) && (
+                  <p className="text-xs text-muted-foreground">{formatDate(occurrences[0]!.start)}</p>
+                )}
               </div>
               <div className="space-y-3">
                 {occurrences.map((o) => (
@@ -151,7 +157,7 @@ function LiveEventCard({ occurrence, now }: { occurrence: EventOccurrence; now: 
             <div className="h-full rounded-full bg-brand-gradient" style={{ width: `${progress}%` }} />
           </div>
           <p className="mt-1.5 text-xs text-white/50">
-            Started {formatDayLabel(start, now).toLowerCase()} at {formatTime(start)}
+            Started {formatDayPhrase(start, now)} at {formatTime(start)}
           </p>
         </div>
         <Link

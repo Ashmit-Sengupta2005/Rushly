@@ -17,6 +17,9 @@ import OrdersPage from '@/pages/OrdersPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import EventsPage from '@/pages/EventsPage';
+import SavedPage from '@/pages/SavedPage';
+import AdminPage from '@/pages/AdminPage';
+import { RecentSalesToast } from '@/features/activity/RecentSalesToast';
 
 export default function App() {
   return (
@@ -52,6 +55,23 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <EventsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/saved"
+                element={
+                  <ProtectedRoute>
+                    <SavedPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* AdminPage redirects non-admins; the API also enforces the ADMIN role */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminPage />
                   </ProtectedRoute>
                 }
               />
@@ -110,6 +130,7 @@ export default function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <Toaster richColors position="bottom-right" />
+            <RecentSalesToast />
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>

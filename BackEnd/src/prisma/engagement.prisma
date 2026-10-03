@@ -1,0 +1,29 @@
+// ============================================================
+// ENGAGEMENT — wishlist and back-in-stock alerts
+// ============================================================
+model WishlistItem {
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    productId String
+    product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([userId, productId])
+    @@index([userId, createdAt])
+}
+
+// One row per (user, product). notifiedAt is set when the restock email is
+// queued; subscribing again resets it so the user is notified next time too.
+model RestockAlert {
+    id         String    @id @default(cuid())
+    userId     String
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    productId  String
+    product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+    createdAt  DateTime  @default(now())
+    notifiedAt DateTime?
+
+    @@unique([userId, productId])
+    @@index([productId, notifiedAt]) // restock fan-out: WHERE productId=? AND notifiedAt IS NULL
+}

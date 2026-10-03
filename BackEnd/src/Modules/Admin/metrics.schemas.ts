@@ -5,3 +5,7 @@ export const revenueByDayQuerySchema=z.object({
     days: z.coerce.number().int().min(1).max(365).default(30),
 });
 export type RevenueByDayQuery = z.infer<typeof revenueByDayQuerySchema>;
+export const overviewQuerySchema=z.object({
+    days: z.coerce.number().int().min(1).max(365).default(30),
+});
+export type OverviewQuery = z.infer<typeof overviewQuerySchema>;

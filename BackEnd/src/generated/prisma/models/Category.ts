@@ -183,6 +183,7 @@ export type CategoryWhereInput = {
   description?: Prisma.StringNullableFilter<"Category"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   products?: Prisma.ProductListRelationFilter
+  flashEvents?: Prisma.FlashEventListRelationFilter
 }
 
 export type CategoryOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type CategoryOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
+  flashEvents?: Prisma.FlashEventOrderByRelationAggregateInput
 }
 
 export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Category"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   products?: Prisma.ProductListRelationFilter
+  flashEvents?: Prisma.FlashEventListRelationFilter
 }, "id" | "slug">
 
 export type CategoryOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type CategoryCreateInput = {
   description?: string | null
   createdAt?: Date | string
   products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
+  flashEvents?: Prisma.FlashEventCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type CategoryUncheckedCreateInput = {
   description?: string | null
   createdAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
+  flashEvents?: Prisma.FlashEventUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUpdateInput = {
@@ -253,6 +258,7 @@ export type CategoryUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
+  flashEvents?: Prisma.FlashEventUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type CategoryUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
+  flashEvents?: Prisma.FlashEventUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateManyInput = {
@@ -317,6 +324,11 @@ export type CategoryNullableScalarRelationFilter = {
   isNot?: Prisma.CategoryWhereInput | null
 }
 
+export type CategoryScalarRelationFilter = {
+  is?: Prisma.CategoryWhereInput
+  isNot?: Prisma.CategoryWhereInput
+}
+
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -337,12 +349,27 @@ export type CategoryUpdateOneWithoutProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutProductsInput, Prisma.CategoryUpdateWithoutProductsInput>, Prisma.CategoryUncheckedUpdateWithoutProductsInput>
 }
 
+export type CategoryCreateNestedOneWithoutFlashEventsInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutFlashEventsInput, Prisma.CategoryUncheckedCreateWithoutFlashEventsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutFlashEventsInput
+  connect?: Prisma.CategoryWhereUniqueInput
+}
+
+export type CategoryUpdateOneRequiredWithoutFlashEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutFlashEventsInput, Prisma.CategoryUncheckedCreateWithoutFlashEventsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutFlashEventsInput
+  upsert?: Prisma.CategoryUpsertWithoutFlashEventsInput
+  connect?: Prisma.CategoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutFlashEventsInput, Prisma.CategoryUpdateWithoutFlashEventsInput>, Prisma.CategoryUncheckedUpdateWithoutFlashEventsInput>
+}
+
 export type CategoryCreateWithoutProductsInput = {
   id?: string
   slug: string
   name: string
   description?: string | null
   createdAt?: Date | string
+  flashEvents?: Prisma.FlashEventCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutProductsInput = {
@@ -351,6 +378,7 @@ export type CategoryUncheckedCreateWithoutProductsInput = {
   name: string
   description?: string | null
   createdAt?: Date | string
+  flashEvents?: Prisma.FlashEventUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutProductsInput = {
@@ -375,6 +403,7 @@ export type CategoryUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashEvents?: Prisma.FlashEventUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutProductsInput = {
@@ -383,6 +412,59 @@ export type CategoryUncheckedUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashEvents?: Prisma.FlashEventUncheckedUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryCreateWithoutFlashEventsInput = {
+  id?: string
+  slug: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryUncheckedCreateWithoutFlashEventsInput = {
+  id?: string
+  slug: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryCreateOrConnectWithoutFlashEventsInput = {
+  where: Prisma.CategoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutFlashEventsInput, Prisma.CategoryUncheckedCreateWithoutFlashEventsInput>
+}
+
+export type CategoryUpsertWithoutFlashEventsInput = {
+  update: Prisma.XOR<Prisma.CategoryUpdateWithoutFlashEventsInput, Prisma.CategoryUncheckedUpdateWithoutFlashEventsInput>
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutFlashEventsInput, Prisma.CategoryUncheckedCreateWithoutFlashEventsInput>
+  where?: Prisma.CategoryWhereInput
+}
+
+export type CategoryUpdateToOneWithWhereWithoutFlashEventsInput = {
+  where?: Prisma.CategoryWhereInput
+  data: Prisma.XOR<Prisma.CategoryUpdateWithoutFlashEventsInput, Prisma.CategoryUncheckedUpdateWithoutFlashEventsInput>
+}
+
+export type CategoryUpdateWithoutFlashEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryUncheckedUpdateWithoutFlashEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 
@@ -392,10 +474,12 @@ export type CategoryUncheckedUpdateWithoutProductsInput = {
 
 export type CategoryCountOutputType = {
   products: number
+  flashEvents: number
 }
 
 export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | CategoryCountOutputTypeCountProductsArgs
+  flashEvents?: boolean | CategoryCountOutputTypeCountFlashEventsArgs
 }
 
 /**
@@ -415,6 +499,13 @@ export type CategoryCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ProductWhereInput
 }
 
+/**
+ * CategoryCountOutputType without action
+ */
+export type CategoryCountOutputTypeCountFlashEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FlashEventWhereInput
+}
+
 
 export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -423,6 +514,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   description?: boolean
   createdAt?: boolean
   products?: boolean | Prisma.Category$productsArgs<ExtArgs>
+  flashEvents?: boolean | Prisma.Category$flashEventsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["category"]>
 
@@ -453,6 +545,7 @@ export type CategorySelectScalar = {
 export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "description" | "createdAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Category$productsArgs<ExtArgs>
+  flashEvents?: boolean | Prisma.Category$flashEventsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -462,6 +555,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Category"
   objects: {
     products: Prisma.$ProductPayload<ExtArgs>[]
+    flashEvents: Prisma.$FlashEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -864,6 +958,7 @@ readonly fields: CategoryFieldRefs;
 export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   products<T extends Prisma.Category$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  flashEvents<T extends Prisma.Category$flashEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$flashEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FlashEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1312,6 +1407,30 @@ export type Category$productsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Category.flashEvents
+ */
+export type Category$flashEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FlashEvent
+   */
+  select?: Prisma.FlashEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FlashEvent
+   */
+  omit?: Prisma.FlashEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FlashEventInclude<ExtArgs> | null
+  where?: Prisma.FlashEventWhereInput
+  orderBy?: Prisma.FlashEventOrderByWithRelationInput | Prisma.FlashEventOrderByWithRelationInput[]
+  cursor?: Prisma.FlashEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FlashEventScalarFieldEnum | Prisma.FlashEventScalarFieldEnum[]
 }
 
 /**

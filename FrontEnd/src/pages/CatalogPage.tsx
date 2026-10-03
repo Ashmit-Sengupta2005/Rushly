@@ -6,6 +6,7 @@ import { ProductGrid } from '@/features/catalog/ProductGrid';
 import { CatalogToolbar } from '@/features/catalog/CatalogToolbar';
 import { useCategories } from '@/features/catalog/useCategories';
 import { EventSpotlight } from '@/features/events/EventSpotlight';
+import { Marquee } from '@/components/layout/Marquee';
 
 const perks = [
   { icon: Timer, label: 'Stock held for you at checkout' },
@@ -100,6 +101,8 @@ export default function CatalogPage() {
             <EventSpotlight />
           </div>
         </section>
+
+        <Marquee />
 
         {/* Shop */}
         <section ref={shopRef} id="shop" className="space-y-6 scroll-mt-32">

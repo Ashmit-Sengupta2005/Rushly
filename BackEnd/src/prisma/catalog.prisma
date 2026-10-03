@@ -8,6 +8,7 @@ model Category {
     name        String
     description String?
     products    Product[]
+    flashEvents FlashEvent[]
     createdAt   DateTime  @default(now())
 }
 
@@ -20,6 +21,9 @@ model Product {
     categoryId  String?
     category    Category? @relation(fields: [categoryId], references: [id])
     isActive    Boolean   @default(true)
+    // Drop exclusives can only be bought while a flash event for their
+    // category is live (see Modules/Events). Everything else is always buyable.
+    isDropExclusive Boolean @default(false)
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
 
@@ -28,6 +32,8 @@ model Product {
     cartItems        CartItem[]
     reservationItems ReservationItem[]
     orderItems       OrderItem[]
+    wishlistItems    WishlistItem[]
+    restockAlerts    RestockAlert[]
 
     @@index([slug])
     @@index([categoryId])

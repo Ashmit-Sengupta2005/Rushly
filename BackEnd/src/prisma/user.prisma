@@ -16,6 +16,8 @@ model User {
     cart                Cart?
     reservations        Reservation[]
     orders              Order[]
+    wishlistItems       WishlistItem[]
+    restockAlerts       RestockAlert[]
 
     @@index([email])
 }

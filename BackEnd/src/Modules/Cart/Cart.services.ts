@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { errors } from "../../utils/Errors.js";
 import { addItemInput,updateItemInput } from "./Cart.schemas.js";
+import { eventsService } from "../Events/Events.service.js";
 
 export const cartService={
     async getOrCreateCart(userId:string){
@@ -41,6 +42,8 @@ export const cartService={
           include: { inventory: true },});
         if (!product || !product.isActive) {
         throw errors.notFound('PRODUCT_NOT_FOUND', 'Product not found');}
+        // Drop exclusives can only be added while their flash event is live
+        await eventsService.assertPurchasable([product]);
         // The upsert below ADDS to an existing line, so check the resulting total,
         // not just the amount being added.
         const alreadyInCart = cart.items.find((i) => i.productId === input.productId)?.quantity ?? 0;

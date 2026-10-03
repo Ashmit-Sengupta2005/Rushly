@@ -20,6 +20,14 @@ export interface RefundConfirmationData {
   currency: string;
 }
 
+export interface RestockNotificationData {
+  customerName: string;
+  productName: string;
+  productUrl: string;
+  imageUrl: string | null;
+  price: number; // paise
+}
+
 // Format money (paise → ₹X.XX)
 const formatMoney = (paise: number, currency: string) => {
   const symbol = currency === 'INR' ? '₹' : currency;
@@ -77,5 +85,24 @@ export const emailTemplates = {
       <p>If you have any questions, please reach out to our support team.</p>
     `),
     text: `Refund Processed — Rushly\n\nHi ${data.customerName},\n\nWe've refunded ${formatMoney(data.totalRefunded, data.currency)} for order ${data.orderId}. Expect it in your account within 5-10 business days.`,
+  }),
+
+  restockNotification: (data: RestockNotificationData) => ({
+    subject: `It's back: ${data.productName}`,
+    html: wrapper(`
+      <h2>Back in stock ⚡</h2>
+      <p>Hi ${data.customerName},</p>
+      <p>Good news — <strong>${data.productName}</strong> is available again. Restocks sell out fast, so don't wait too long.</p>
+      ${data.imageUrl ? `<img src="${data.imageUrl}" alt="${data.productName}" width="280" style="display:block; border-radius: 8px; margin: 24px 0;">` : ''}
+      <p style="margin: 4px 0;"><strong>Price:</strong> ${formatMoney(data.price, 'INR')}</p>
+      <p style="margin: 24px 0;">
+        <a href="${data.productUrl}" style="background: #111; color: #fff; padding: 12px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">Shop now</a>
+      </p>
+    `),
+    text: `Back in stock — Rushly
+
+Hi ${data.customerName},
+
+${data.productName} is available again (${formatMoney(data.price, 'INR')}). Shop now: ${data.productUrl}`,
   }),
 };

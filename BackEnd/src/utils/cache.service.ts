@@ -89,4 +89,6 @@ export const cacheKeys = {
   productBySlug: (slug: string) => `products:slug:${slug}`,
   productList: (queryHash: string) => `products:list:${queryHash}`,
   productListPattern: () => `products:list:*`,       // for bulk invalidation
+  activeEvents: () => `events:active`,
+  recentSales: () => `activity:recent-sales`,
 };

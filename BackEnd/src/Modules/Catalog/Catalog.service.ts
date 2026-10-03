@@ -6,6 +6,7 @@ import { logger } from '../../utils/logger.js';
 import type { ListProductsQuery,CreateProductInput,UpdateProductInput,AdjustInventoryInput } from './Catalog.schemas.js';
 import { cacheService, cacheKeys} from '../../utils/cache.service.js';
 import crypto from 'node:crypto';
+import { queueRestockNotifications } from '../Engagement/RestockAlerts.service.js';
 
 // include is used for strictly reading results on the basis of joins
 
@@ -18,7 +19,7 @@ type WithInventory = { id: string; inventory?: { availableStock: number } | null
  * overlay the live Redis stock on every read (one MGET, sub-millisecond).
  * Returns new objects — never mutates what's in the cache.
  */
-async function withLiveStock<T extends WithInventory>(products: T[]): Promise<T[]> {
+export async function withLiveStock<T extends WithInventory>(products: T[]): Promise<T[]> {
   const live = await getRedisStocks(products.map((p) => p.id));
   return products.map((p) => {
     const stock = live.get(p.id);
@@ -66,7 +67,8 @@ export const catalogService={
         include:{
             images: { orderBy: { position: 'asc' }, take: 1 },
             category: { select: { slug: true, name: true } },
-            inventory: { select: { availableStock: true } },
+            // totalStock powers the "% claimed" bar on product cards
+            inventory: { select: { availableStock: true, totalStock: true } },
         },
         orderBy: { createdAt: 'desc' },
         take: query.limit + 1,
@@ -194,6 +196,13 @@ export const catalogService={
             version: { increment: 1 },
           },
         });
+
+        // Sold out → back in stock: queue "it's back" emails in the SAME
+        // transaction (outbox pattern), so alerts fire iff the restock commits.
+        const before = inventory.availableStock - input.delta;
+        if (before <= 0 && inventory.availableStock > 0) {
+          await queueRestockNotifications(tx, productId);
+        }
 
         await tx.auditLog.create({
           data: {

@@ -11,16 +11,14 @@
     <meta name="theme-color" content="#111111" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Link previews (WhatsApp, LinkedIn, Slack). To get an image card, add a
-         1200×630 screenshot as public/og.png and uncomment the og:image line
-         with your ABSOLUTE deployed URL (relative URLs don't work for OG). -->
+    <!-- Link previews (WhatsApp, LinkedIn, Slack). og:image (public/og.png) is
+         injected at build time with an absolute URL — see vite.config.ts. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Rushly — Flash-sale storefront" />
     <meta
       property="og:description"
       content="Real-time stock reservation, Stripe checkout and no overselling under 500 concurrent buyers."
     />
-    <!-- <meta property="og:image" content="https://YOUR-APP.vercel.app/og.png" /> -->
     <meta name="twitter:card" content="summary_large_image" />
     <!-- Apply the saved colour theme before first paint (no flash). Keep the key
          in sync with src/features/theme/accent.ts. -->

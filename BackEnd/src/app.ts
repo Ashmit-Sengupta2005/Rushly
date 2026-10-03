@@ -16,6 +16,9 @@ import { checkoutRouter } from "./Modules/CheckOut/Checkout.routes.js";
 import { stripeWebhookRouter } from "./Modules/WebHooks/stripeWebhooks.routes.js";
 import { adminRouter } from "./Modules/Admin/admin.routes.js";
 import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
+import { eventsRouter } from "./Modules/Events/Events.routes.js";
+import { wishlistRouter, restockAlertsRouter } from "./Modules/Engagement/Engagement.routes.js";
+import { activityRouter } from "./Modules/Activity/Activity.routes.js";
 
     const app=express();
     // Number of proxies in front of the app whose X-Forwarded-For entries we trust.
@@ -57,6 +60,10 @@ import { ordersRouter } from "./Modules/Orders/Orders.routes.js";
     app.use('/api/cart', cartRouter);
     app.use('/api/checkout',checkoutRouter);
     app.use('/api/orders',ordersRouter);
+    app.use('/api/events', eventsRouter);
+    app.use('/api/wishlist', wishlistRouter);
+    app.use('/api/restock-alerts', restockAlertsRouter);
+    app.use('/api/activity', activityRouter);
 
     app.use(errorHandler);
     export default app;
